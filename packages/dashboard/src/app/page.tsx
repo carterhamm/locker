@@ -6,12 +6,14 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { TerminalDemo } from "@/components/TerminalDemo";
 import { CopyCommand } from "@/components/CopyCommand";
 import {
-  ShieldLockIcon,
-  AuditLogIcon,
-  TerminalIcon,
-  BoltIcon,
-  KeyScopeIcon,
-  GlobePlugIcon,
+  AnimShieldLock,
+  AnimAuditLog,
+  AnimTerminal,
+  AnimBolt,
+  AnimKeyScope,
+  AnimGlobe,
+} from "@/components/AnimatedIcons";
+import {
   GitHubIcon,
   LockerLogo,
 } from "@/components/Icons";
@@ -30,10 +32,12 @@ function FeatureCard({
 }: {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon: (props: { hover: boolean }) => React.ReactNode;
   delay: number;
   glowColor?: string;
 }) {
+  const [hover, setHover] = useState(false);
+
   return (
     <ScrollReveal delay={delay}>
       <div
@@ -49,12 +53,14 @@ function FeatureCard({
           overflow: "hidden",
         }}
         onMouseEnter={(e) => {
+          setHover(true);
           e.currentTarget.style.background = "var(--bg-card-hover)";
           e.currentTarget.style.borderColor = "var(--border-medium)";
           e.currentTarget.style.transform = "translateY(-4px)";
           e.currentTarget.style.boxShadow = `0 0 0 1px rgba(255,255,255,0.06), 0 16px 48px rgba(0,0,0,0.4), 0 0 80px ${glowColor}`;
         }}
         onMouseLeave={(e) => {
+          setHover(false);
           e.currentTarget.style.background = "var(--bg-card)";
           e.currentTarget.style.borderColor = "var(--border-subtle)";
           e.currentTarget.style.transform = "translateY(0)";
@@ -90,7 +96,7 @@ function FeatureCard({
             color: "var(--text-primary)",
           }}
         >
-          {icon}
+          {icon({ hover })}
         </div>
         <h3
           style={{
@@ -387,42 +393,42 @@ export default function LandingPage() {
           }}
         >
           <FeatureCard
-            icon={<ShieldLockIcon size={22} />}
+            icon={({ hover }) => <AnimShieldLock hover={hover} />}
             title="AES-256-GCM Encryption"
             description="Every key encrypted with authenticated encryption. Envelope model — your keys are never stored in plaintext."
             delay={0}
             glowColor="rgba(255,255,255,0.08)"
           />
           <FeatureCard
-            icon={<AuditLogIcon size={22} />}
+            icon={({ hover }) => <AnimAuditLog hover={hover} />}
             title="Full Audit Trail"
             description="Every retrieval logged with timestamp, user, and agent identifier. Know exactly who accessed what."
             delay={80}
             glowColor="rgba(120,180,255,0.06)"
           />
           <FeatureCard
-            icon={<TerminalIcon size={22} />}
+            icon={({ hover }) => <AnimTerminal hover={hover} />}
             title="CLI-First"
             description="Built for developers. locker get <service> returns your key to stdout. Works with Claude, Cursor, Codex."
             delay={160}
             glowColor="rgba(50,215,75,0.06)"
           />
           <FeatureCard
-            icon={<BoltIcon size={22} />}
+            icon={({ hover }) => <AnimBolt hover={hover} />}
             title="Instant Retrieval"
             description="Sub-100ms key retrieval. Your AI agent doesn't wait. Neither do you."
             delay={240}
             glowColor="rgba(255,200,50,0.06)"
           />
           <FeatureCard
-            icon={<KeyScopeIcon size={22} />}
+            icon={({ hover }) => <AnimKeyScope hover={hover} />}
             title="Scoped Access"
             description="JWT-authenticated. Short-lived tokens. Each user's keys are isolated. No cross-user access."
             delay={320}
             glowColor="rgba(200,120,255,0.06)"
           />
           <FeatureCard
-            icon={<GlobePlugIcon size={22} />}
+            icon={({ hover }) => <AnimGlobe hover={hover} />}
             title="Works With Everything"
             description="Resend, Stripe, OpenAI, GitHub — any service that issues API keys. No integrations needed."
             delay={400}
