@@ -358,20 +358,27 @@ export function TerminalDemo() {
           <>
             {/* Backdrop */}
             <motion.div
+              initial={{ opacity: 0 }}
               animate={{ opacity: expanded ? 1 : 0 }}
               transition={{ duration: 0.25 }}
-              style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+              style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", pointerEvents: expanded ? "auto" : "none" }}
               onClick={exitFullscreen}
             />
-            {/* Window */}
+            {/* Window — initial from source rect, animate to fullscreen or back */}
             <motion.div
+              initial={{
+                x: sr.left,
+                y: sr.top,
+                width: sr.width,
+                height: sr.height,
+                borderRadius: 16,
+              }}
               animate={{
                 x: expanded ? fsX : sr.left,
                 y: expanded ? fsY : sr.top,
                 width: expanded ? fsW : sr.width,
                 height: expanded ? fsH : sr.height,
                 borderRadius: expanded ? 12 : 16,
-                opacity: expanded ? 1 : 0.9,
               }}
               transition={{
                 type: "spring",

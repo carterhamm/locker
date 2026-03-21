@@ -58,31 +58,23 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green fill — full coverage, fades in */}
+      {/* Green orb — right side only, scales in */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to left, rgba(50, 215, 75, 0.18) 0%, rgba(50, 215, 75, 0.08) 70%, rgba(50, 215, 75, 0.03) 100%)",
-          pointerEvents: "none",
-          opacity: isCopied ? 1 : 0,
-          transition: isCopied ? "opacity 200ms ease" : "opacity 100ms ease",
-        }}
-      />
-      {/* Bright orb — inside right edge */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-10px",
-          right: "5px",
-          width: "100px",
-          height: "100px",
+          top: "-20px",
+          right: "0px",
+          width: "130px",
+          height: "130px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.35) 0%, transparent 65%)",
-          filter: "blur(14px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.45) 0%, rgba(50, 215, 75, 0.12) 40%, transparent 70%)",
+          filter: "blur(16px)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transition: isCopied ? "opacity 200ms ease" : "opacity 80ms ease",
+          transform: isCopied ? "scale(1)" : "scale(0.4)",
+          transition: isCopied
+            ? "opacity 200ms ease, transform 350ms cubic-bezier(0.16, 1, 0.3, 1)"
+            : "opacity 100ms ease, transform 200ms ease",
         }}
       />
 
