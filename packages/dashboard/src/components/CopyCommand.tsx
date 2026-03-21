@@ -22,30 +22,29 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
     onCopy(id);
   }
 
-  // Unique gradient ID for the border mask
-  const gradId = `border-${id}`;
-
   return (
     <div style={{ position: "relative" }}>
       {/* SVG border with fading corners:
           0% opacity at top-right and bottom-left,
           100% opacity at top-left and bottom-right */}
-      <svg
-        style={{ position: "absolute", inset: -1, width: "calc(100% + 2px)", height: "calc(100% + 2px)", pointerEvents: "none", zIndex: 2 }}
-      >
-        <defs>
-          <linearGradient id={`${gradId}-tl`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={isCopied ? "rgba(50,215,75,0.3)" : "rgba(255,255,255,0.1)"} />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-          <linearGradient id={`${gradId}-br`} x1="1" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor={isCopied ? "rgba(50,215,75,0.3)" : "rgba(255,255,255,0.1)"} />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
-        <rect x="0.5" y="0.5" width="calc(100% - 1px)" height="calc(100% - 1px)" rx="18" ry="18" fill="none" stroke={`url(#${gradId}-tl)`} strokeWidth="1" />
-        <rect x="0.5" y="0.5" width="calc(100% - 1px)" height="calc(100% - 1px)" rx="18" ry="18" fill="none" stroke={`url(#${gradId}-br)`} strokeWidth="1" />
-      </svg>
+      {/* Fading border — CSS mask on a div border instead of SVG */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "18px",
+          padding: "1px",
+          background: isCopied
+            ? "linear-gradient(135deg, rgba(50,215,75,0.3) 0%, transparent 40%, transparent 60%, rgba(50,215,75,0.3) 100%)"
+            : "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.1) 100%)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude",
+          pointerEvents: "none",
+          zIndex: 2,
+          transition: "background 300ms ease",
+        }}
+      />
 
       <button
         onClick={handleCopy}
