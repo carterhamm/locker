@@ -48,6 +48,7 @@ export function TerminalDemo() {
   const [copiedLine, setCopiedLine] = useState<number | null>(null);
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
 
   const completedLines = useRef<TerminalLine[]>([]);
   const typingText = useRef("");
@@ -232,7 +233,12 @@ export function TerminalDemo() {
       <div style={{ display: "flex", gap: 0, margin: "-8px", marginRight: 0 }} onMouseLeave={() => setHoveredDot(null)}>
         <Dot color="#ff5f57" sym="✕" id="c" fn={() => setMode("closed")} />
         <Dot color="#febc2e" sym="−" id="m" fn={() => setMode("minimized")} />
-        <Dot color="#28c840" sym="⤢" id="f" fn={() => setMode(isFS ? "normal" : "fullscreen")} />
+        <Dot color="#28c840" sym="⤢" id="f" fn={() => {
+          if (!isFS && wrapperRef.current) {
+            setSourceRect(wrapperRef.current.getBoundingClientRect());
+          }
+          setMode(isFS ? "normal" : "fullscreen");
+        }} />
       </div>
       <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
         locker &mdash; zsh
@@ -313,8 +319,18 @@ export function TerminalDemo() {
     );
   }
 
-  // ── Fullscreen — portaled with scale animation ──
+  // ── Fullscreen — animate from inline rect to fullscreen rect ──
   if (isFS && mounted) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const pad = 0.03; // 3% padding
+    const fsX = vw * pad;
+    const fsY = vh * pad;
+    const fsW = vw * (1 - pad * 2);
+    const fsH = vh * (1 - pad * 2);
+
+    const sr = sourceRect || { left: vw * 0.15, top: vh * 0.3, width: vw * 0.7, height: vh * 0.4 };
+
     return (
       <>
         <div ref={wrapperRef} style={{ height: 0, overflow: "hidden" }}>
@@ -330,24 +346,42 @@ export function TerminalDemo() {
               onClick={() => setMode("normal")}
             />
             <motion.div
-              initial={{ scale: 0.7, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{
+                x: sr.left,
+                y: sr.top,
+                width: sr.width,
+                height: sr.height,
+                borderRadius: 16,
+              }}
+              animate={{
+                x: fsX,
+                y: fsY,
+                width: fsW,
+                height: fsH,
+                borderRadius: 12,
+              }}
+              exit={{
+                x: sr.left,
+                y: sr.top,
+                width: sr.width,
+                height: sr.height,
+                borderRadius: 16,
+              }}
               transition={{
                 type: "spring",
-                damping: 28,
-                stiffness: 300,
+                damping: 30,
+                stiffness: 200,
                 mass: 0.8,
               }}
               style={{
                 position: "fixed",
-                top: "3vh", left: "3vw", right: "3vw", bottom: "3vh",
+                top: 0,
+                left: 0,
                 zIndex: 9999,
-                borderRadius: "12px",
                 overflow: "hidden",
                 border: "1px solid rgba(255,255,255,0.1)",
                 boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
                 display: "flex", flexDirection: "column",
-                transformOrigin: "center center",
               }}
             >
               {titleBar}

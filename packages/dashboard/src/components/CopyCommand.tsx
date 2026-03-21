@@ -1,5 +1,7 @@
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 interface CopyCommandProps {
   command: string;
   label: string;
@@ -12,14 +14,9 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
   const isCopied = copiedId === id;
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(command);
-    } catch {
-      const el = document.createElement("textarea");
-      el.value = command;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
+    try { await navigator.clipboard.writeText(command); } catch {
+      const el = document.createElement("textarea"); el.value = command;
+      document.body.appendChild(el); el.select(); document.execCommand("copy");
       document.body.removeChild(el);
     }
     onCopy(id);
@@ -61,23 +58,34 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green glow — appears on right side when copied */}
+      {/* Green gradient fill — sweeps from right to left, fills entire tile */}
       <div
         style={{
           position: "absolute",
-          top: "-30px",
-          right: "-20px",
-          width: "180px",
-          height: "180px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.4) 0%, rgba(50, 215, 75, 0.1) 40%, transparent 70%)",
-          filter: "blur(20px)",
+          inset: 0,
+          background: "linear-gradient(to left, rgba(50, 215, 75, 0.15) 0%, rgba(50, 215, 75, 0.06) 60%, transparent 100%)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transform: isCopied ? "scale(1)" : "scale(0.5)",
+          transform: isCopied ? "translateX(0)" : "translateX(100%)",
           transition: isCopied
-            ? "opacity 200ms ease, transform 400ms cubic-bezier(0.16, 1, 0.3, 1)"
-            : "opacity 100ms ease, transform 200ms ease",
+            ? "transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease"
+            : "transform 300ms ease, opacity 100ms ease",
+        }}
+      />
+      {/* Bright orb accent on right — stays on right, doesn't move */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-25px",
+          right: "-15px",
+          width: "140px",
+          height: "140px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.4) 0%, rgba(50, 215, 75, 0.1) 40%, transparent 70%)",
+          filter: "blur(18px)",
+          pointerEvents: "none",
+          opacity: isCopied ? 1 : 0,
+          transition: isCopied ? "opacity 250ms ease 100ms" : "opacity 80ms ease",
         }}
       />
 
@@ -95,19 +103,13 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         >
           {label}
         </div>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "14px",
-            color: "var(--text-primary)",
-          }}
-        >
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--text-primary)" }}>
           <span style={{ color: "var(--text-tertiary)", marginRight: "6px" }}>$</span>
           {command}
         </div>
       </div>
 
-      {/* Copy / check icon */}
+      {/* Copy / check icon with animated checkmark */}
       <div
         style={{
           position: "relative",
@@ -125,16 +127,52 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
           transition: "all 200ms ease",
         }}
       >
-        {isCopied ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#32d74b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        ) : (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-        )}
+        <AnimatePresence mode="wait">
+          {isCopied ? (
+            <motion.svg
+              key="check"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#32d74b"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ scale: 0, rotate: -45 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: "spring", damping: 15, stiffness: 300 }}
+            >
+              <motion.polyline
+                points="20 6 9 17 4 12"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
+                style={{ strokeDasharray: 1, strokeDashoffset: 0 }}
+              />
+            </motion.svg>
+          ) : (
+            <motion.svg
+              key="copy"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.3)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </motion.svg>
+          )}
+        </AnimatePresence>
       </div>
     </button>
   );
