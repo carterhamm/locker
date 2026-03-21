@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useReducer, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { LockerLogo } from "./Icons";
 
 interface TerminalLine {
@@ -46,6 +47,7 @@ export function TerminalDemo() {
   const [mode, setMode] = useState<"normal" | "minimized" | "fullscreen" | "closed">("normal");
   const [copiedLine, setCopiedLine] = useState<number | null>(null);
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const completedLines = useRef<TerminalLine[]>([]);
   const typingText = useRef("");
@@ -53,6 +55,9 @@ export function TerminalDemo() {
   const isRunning = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Start animation when scrolled into view
   useEffect(() => {
@@ -63,7 +68,7 @@ export function TerminalDemo() {
         if (e.isIntersecting && !isRunning.current && !isDone.current) {
           isRunning.current = true;
           obs.disconnect();
-          animate();
+          runAnimation();
         }
       },
       { threshold: 0.3 }
@@ -77,9 +82,7 @@ export function TerminalDemo() {
   // Esc exits fullscreen
   useEffect(() => {
     if (mode !== "fullscreen") return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setMode("normal");
-    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMode("normal"); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [mode]);
@@ -90,7 +93,7 @@ export function TerminalDemo() {
     return new Promise(r => { timerRef.current = setTimeout(r, ms); });
   }
 
-  async function animate() {
+  async function runAnimation() {
     for (const line of LINES) {
       if (line.type === "command") {
         typingText.current = "";
@@ -125,49 +128,18 @@ export function TerminalDemo() {
     setTimeout(() => setCopiedLine(null), 2000);
   }, []);
 
-  const typing = typingText.current.length > 0 && !isDone.current;
-
-  // ── Closed ──
-  if (mode === "closed") return null;
-
-  if (mode === "minimized") {
-    return createPortal(
-      <div
-        onClick={() => setMode("normal")}
-        style={{
-          position: "fixed",
-          left: "8px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 1000,
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          background: "rgba(30,30,30,0.95)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          backdropFilter: "blur(20px)",
-          cursor: "pointer",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-        }}
-        title="Restore terminal"
-      >
-        <LockerLogo size={20} />
-      </div>,
-      document.body
-    );
+  function handleRestore() {
+    setMode("normal");
+    // Scroll back to the demo section
+    setTimeout(() => {
+      wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   }
+
+  const typing = typingText.current.length > 0 && !isDone.current;
+  const isFS = mode === "fullscreen";
+
+  if (mode === "closed") return null;
 
   // ── Stoplight dot ──
   function Dot({ color, sym, id, fn }: { color: string; sym: string; id: string; fn: () => void }) {
@@ -193,7 +165,7 @@ export function TerminalDemo() {
   }
 
   // ── Line renderer ──
-  function Line({ line, idx }: { line: TerminalLine; idx: number }) {
+  function LineRow({ line, idx }: { line: TerminalLine; idx: number }) {
     const cmd = line.type === "command" && line.copyText;
     const copied = copiedLine === idx;
     return (
@@ -224,12 +196,10 @@ export function TerminalDemo() {
     );
   }
 
-  const isFS = mode === "fullscreen";
-
-  // Shared terminal body JSX
-  const terminalBody = (
+  // Terminal body content (shared)
+  const termBody = (
     <>
-      {completedLines.current.map((line, i) => <Line key={i} line={line} idx={i} />)}
+      {completedLines.current.map((line, i) => <LineRow key={i} line={line} idx={i} />)}
       {typing && (
         <div style={{ color: COLORS.command, height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
           <span style={{ userSelect: "none", color: "rgba(255,255,255,0.3)" }}>${"\u00A0"}</span>
@@ -264,50 +234,121 @@ export function TerminalDemo() {
     </div>
   );
 
-  // Fullscreen — portal to document.body
-  if (isFS) {
-    return createPortal(
+  // ── Minimized pill — portaled, with genie animation ──
+  if (mode === "minimized" && mounted) {
+    return (
       <>
-        <div
-          style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
-          onClick={() => setMode("normal")}
-        />
-        <div style={{
-          position: "fixed", top: "5vh", left: "5vw", right: "5vw", bottom: "5vh",
-          zIndex: 9999, borderRadius: "16px", overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
-          display: "flex", flexDirection: "column",
-        }}>
-          {titleBar}
-          <div style={{
-            padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
-            fontFamily: "var(--font-mono)", fontSize: "13.5px",
-            flex: 1, overflow: "auto",
-          }}>
-            {terminalBody}
-          </div>
+        {/* Invisible wrapper to keep the IntersectionObserver ref alive */}
+        <div ref={wrapperRef} style={{ height: 0, overflow: "hidden" }}>
+          <div ref={bodyRef} />
         </div>
-      </>,
-      document.body
+        {createPortal(
+          <motion.div
+            initial={{ scale: 0, borderRadius: "16px", width: 300, height: BODY_H + 44, opacity: 0.5 }}
+            animate={{ scale: 1, borderRadius: "50%", width: 44, height: 44, opacity: 1 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
+            onClick={handleRestore}
+            style={{
+              position: "fixed",
+              left: "8px",
+              top: "50%",
+              translateY: "-50%",
+              zIndex: 1000,
+              background: "rgba(30,30,30,0.95)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              backdropFilter: "blur(20px)",
+              cursor: "pointer",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
+            whileHover={{ scale: 1.1, borderColor: "rgba(255,255,255,0.25)" }}
+            title="Restore terminal"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <LockerLogo size={20} />
+            </motion.div>
+          </motion.div>,
+          document.body
+        )}
+      </>
     );
   }
 
-  // Normal inline
+  // ── Fullscreen — portaled with motion expand ──
+  if (isFS && mounted) {
+    return (
+      <>
+        <div ref={wrapperRef} style={{ height: 0, overflow: "hidden" }}>
+          <div ref={bodyRef} />
+        </div>
+        {createPortal(
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+              onClick={() => setMode("normal")}
+            />
+            <motion.div
+              layoutId="terminal-window"
+              initial={{ top: "30%", left: "10%", right: "10%", bottom: "30%", borderRadius: "16px" }}
+              animate={{ top: "3vh", left: "3vw", right: "3vw", bottom: "3vh", borderRadius: "12px" }}
+              exit={{ top: "30%", left: "10%", right: "10%", bottom: "30%", borderRadius: "16px" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260, mass: 0.9 }}
+              style={{
+                position: "fixed", zIndex: 9999,
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
+                display: "flex", flexDirection: "column",
+              }}
+            >
+              {titleBar}
+              <div style={{
+                padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
+                fontFamily: "var(--font-mono)", fontSize: "13.5px",
+                flex: 1, overflow: "auto",
+              }}>
+                {termBody}
+              </div>
+            </motion.div>
+          </>,
+          document.body
+        )}
+      </>
+    );
+  }
+
+  // ── Normal inline — with motion wrapper for expand animation ──
   return (
-    <div style={{
-      borderRadius: "16px", overflow: "hidden",
-      border: "1px solid rgba(255,255,255,0.06)",
-      boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
-    }}>
-      {titleBar}
-      <div ref={bodyRef} style={{
-        padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
-        fontFamily: "var(--font-mono)", fontSize: "13.5px",
-        height: BODY_H, overflow: "hidden",
-      }}>
-        {terminalBody}
-      </div>
+    <div ref={wrapperRef}>
+      <motion.div
+        layoutId="terminal-window"
+        transition={{ type: "spring", damping: 28, stiffness: 260, mass: 0.9 }}
+        style={{
+          borderRadius: "16px", overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
+        }}
+      >
+        {titleBar}
+        <div ref={bodyRef} style={{
+          padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
+          fontFamily: "var(--font-mono)", fontSize: "13.5px",
+          height: BODY_H, overflow: "hidden",
+        }}>
+          {termBody}
+        </div>
+      </motion.div>
     </div>
   );
 }
