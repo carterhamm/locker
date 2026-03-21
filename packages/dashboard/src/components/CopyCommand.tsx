@@ -23,11 +23,47 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* SVG border with fading corners:
-          0% opacity at top-right and bottom-left,
-          100% opacity at top-left and bottom-right */}
-      {/* Fading border — CSS mask on a div border instead of SVG */}
+    <button
+      onClick={handleCopy}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        padding: "20px 22px",
+        borderRadius: "18px",
+        border: "none",
+        cursor: "pointer",
+        textAlign: "left",
+        position: "relative",
+        overflow: "hidden",
+        background: "rgba(28, 28, 28, 0.85)",
+        backdropFilter: "blur(40px)",
+        WebkitBackdropFilter: "blur(40px)",
+        boxShadow: isCopied
+          ? `inset 0 0 30px rgba(50, 215, 75, 0.08),
+             inset -6px 1px 12px rgba(50, 215, 75, 0.1),
+             0 12px 24px rgba(0, 0, 0, 0.1)`
+          : `inset -4px 1px 10px rgba(255, 255, 255, 0.02),
+             0 12px 24px rgba(0, 0, 0, 0.1)`,
+        transition: "all 350ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+      onMouseEnter={(e) => {
+        if (!isCopied) {
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.boxShadow = `inset -4px 1px 10px rgba(255, 255, 255, 0.03),
+            0 20px 40px rgba(0, 0, 0, 0.15)`;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isCopied) {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = `inset -4px 1px 10px rgba(255, 255, 255, 0.02),
+            0 12px 24px rgba(0, 0, 0, 0.1)`;
+        }
+      }}
+    >
+      {/* Fading border — visible at top-left & bottom-right, invisible at top-right & bottom-left */}
       <div
         style={{
           position: "absolute",
@@ -45,43 +81,6 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
           transition: "background 300ms ease",
         }}
       />
-
-      <button
-        onClick={handleCopy}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          padding: "20px 22px",
-          borderRadius: "18px",
-          border: "1px solid transparent",
-          cursor: "pointer",
-          textAlign: "left",
-          position: "relative",
-          overflow: "hidden",
-          background: "rgba(28, 28, 28, 0.85)",
-          backdropFilter: "blur(40px)",
-          WebkitBackdropFilter: "blur(40px)",
-          boxShadow: `inset -4px 1px 10px rgba(255, 255, 255, 0.02),
-            0 12px 24px rgba(0, 0, 0, 0.1)`,
-          transition: "all 350ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-        onMouseEnter={(e) => {
-          if (!isCopied) {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = `inset -4px 1px 10px rgba(255, 255, 255, 0.03),
-              0 20px 40px rgba(0, 0, 0, 0.15)`;
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isCopied) {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = `inset -4px 1px 10px rgba(255, 255, 255, 0.02),
-              0 12px 24px rgba(0, 0, 0, 0.1)`;
-          }
-        }}
-      >
         {/* Soft green ambient glow — very subtle, right side */}
         <div
           style={{
@@ -186,7 +185,6 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
             )}
           </AnimatePresence>
         </div>
-      </button>
-    </div>
+    </button>
   );
 }

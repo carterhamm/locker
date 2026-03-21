@@ -13,19 +13,26 @@ const iconProps = {
   strokeLinejoin: "round" as const,
 };
 
-// Shield — whole shield scales + shackle pops open
+// Shield — bigger shield (28px), same-size lock, tilts on hover
 export function AnimShieldLock({ hover }: { hover: boolean }) {
   return (
     <motion.svg
-      {...iconProps}
-      animate={{ scale: hover ? 1.1 : 1, rotate: hover ? -5 : 0 }}
+      width={28} height={28} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round"
+      animate={{ rotate: hover ? -6 : 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 12 }}
     >
-      <path d="M12 2L3 7v5c0 5.25 3.75 10.13 9 11.25C17.25 22.13 21 17.25 21 12V7l-9-5z" />
-      <rect x="9.5" y="10" width="5" height="4.5" rx="0.5" />
+      <motion.path
+        d="M12 2L3 7v5c0 5.25 3.75 10.13 9 11.25C17.25 22.13 21 17.25 21 12V7l-9-5z"
+        animate={{ scale: hover ? 1.05 : 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        style={{ transformOrigin: "center" }}
+      />
+      <rect x="9.5" y="10" width="5" height="4.5" rx="0.5" strokeWidth="1.5" />
       <motion.path
         d="M10.5 10V8.5a1.5 1.5 0 0 1 3 0V10"
-        animate={{ y: hover ? -3 : 0, rotate: hover ? -15 : 0 }}
+        strokeWidth="1.5"
+        animate={{ y: hover ? -3 : 0, rotate: hover ? -20 : 0 }}
         transition={{ type: "spring", stiffness: 500, damping: 10 }}
         style={{ transformOrigin: "13.5px 10px" }}
       />

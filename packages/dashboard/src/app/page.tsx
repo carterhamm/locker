@@ -44,7 +44,7 @@ function FeatureCard({
         style={{
           padding: "32px",
           borderRadius: "var(--radius-xl)",
-          border: "1px solid var(--border-subtle)",
+          border: "none",
           background: "var(--bg-card)",
           backdropFilter: "var(--glass-blur)",
           transition: `all var(--duration-normal) var(--ease-out-expo)`,
@@ -55,18 +55,33 @@ function FeatureCard({
         onMouseEnter={(e) => {
           setHover(true);
           e.currentTarget.style.background = "var(--bg-card-hover)";
-          e.currentTarget.style.borderColor = "var(--border-medium)";
           e.currentTarget.style.transform = "translateY(-4px)";
-          e.currentTarget.style.boxShadow = `0 0 0 1px rgba(255,255,255,0.06), 0 16px 48px rgba(0,0,0,0.4), 0 0 80px ${glowColor}`;
+          e.currentTarget.style.boxShadow = `0 16px 48px rgba(0,0,0,0.4), 0 0 80px ${glowColor}`;
         }}
         onMouseLeave={(e) => {
           setHover(false);
           e.currentTarget.style.background = "var(--bg-card)";
-          e.currentTarget.style.borderColor = "var(--border-subtle)";
           e.currentTarget.style.transform = "translateY(0)";
           e.currentTarget.style.boxShadow = "none";
         }}
       >
+        {/* Fading border — 100% at top-left & bottom-right, 0% at top-right & bottom-left */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "var(--radius-xl)",
+            padding: "1px",
+            background: hover
+              ? `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.15) 100%)`
+              : `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.08) 100%)`,
+            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+            WebkitMaskComposite: "xor",
+            maskComposite: "exclude",
+            pointerEvents: "none",
+            transition: "background 300ms ease",
+          }}
+        />
         {/* Ambient glow behind icon */}
         <div
           style={{
