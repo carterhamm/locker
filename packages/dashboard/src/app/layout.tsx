@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { LGProvider } from "@/components/LiquidGlass/ClientProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,7 +31,9 @@ export default function RootLayout({
       </head>
       <body className="grain-overlay">
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <LGProvider>{children}</LGProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
