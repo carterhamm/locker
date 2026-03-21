@@ -7,7 +7,6 @@ interface TerminalLine {
   text: string;
   type: "command" | "output" | "comment" | "success";
   delay: number;
-  /** The actual command (without $) — for tap-to-copy */
   copyText?: string;
 }
 
@@ -37,16 +36,13 @@ const COLORS: Record<string, string> = {
   success: "#32d74b",
 };
 
-const LINE_HEIGHT = 23; // px — consistent for all lines including empty
-const TOTAL_LINES = LINES.length + 1; // +1 for the final $ prompt
-const BODY_PADDING = 20;
-const BODY_HEIGHT = TOTAL_LINES * LINE_HEIGHT + BODY_PADDING * 2;
+const LH = 23;
+const BODY_PAD = 20;
+const BODY_H = (LINES.length + 1) * LH + BODY_PAD * 2;
 
 export function TerminalDemo() {
   const [, forceRender] = useReducer((x: number) => x + 1, 0);
-  const [isVisible, setIsVisible] = useState(true);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [mode, setMode] = useState<"normal" | "minimized" | "fullscreen" | "closed">("normal");
   const [copiedLine, setCopiedLine] = useState<number | null>(null);
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
 
@@ -55,33 +51,36 @@ export function TerminalDemo() {
   const isDone = useRef(false);
   const isRunning = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
+  // Start animation when scrolled into view
   useEffect(() => {
-    const el = containerRef.current;
+    const el = bodyRef.current;
     if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isRunning.current && !isDone.current) {
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !isRunning.current && !isDone.current) {
           isRunning.current = true;
-          observer.disconnect();
-          runAnimation();
+          obs.disconnect();
+          animate();
         }
       },
       { threshold: 0.3 }
     );
-    observer.observe(el);
-    return () => observer.disconnect();
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
-  function render() {
-    forceRender();
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  function render() { forceRender(); }
+
+  function wait(ms: number): Promise<void> {
+    return new Promise(r => { timerRef.current = setTimeout(r, ms); });
   }
 
-  async function runAnimation() {
-    for (let i = 0; i < LINES.length; i++) {
-      const line = LINES[i];
+  async function animate() {
+    for (const line of LINES) {
       if (line.type === "command") {
         typingText.current = "";
         render();
@@ -105,315 +104,198 @@ export function TerminalDemo() {
     render();
   }
 
-  function wait(ms: number): Promise<void> {
-    return new Promise((resolve) => {
-      timerRef.current = setTimeout(resolve, ms);
-    });
-  }
-
-  useEffect(() => {
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, []);
-
-  const handleCopyLine = useCallback(async (text: string, idx: number) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const el = document.createElement("textarea");
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
+  const copyLine = useCallback(async (text: string, idx: number) => {
+    try { await navigator.clipboard.writeText(text); } catch {
+      const t = document.createElement("textarea"); t.value = text;
+      document.body.appendChild(t); t.select(); document.execCommand("copy");
+      document.body.removeChild(t);
     }
     setCopiedLine(idx);
     setTimeout(() => setCopiedLine(null), 2000);
   }, []);
 
-  function handleClose() {
-    setIsFullscreen(false);
-    setIsVisible(false);
-  }
+  const typing = typingText.current.length > 0 && !isDone.current;
 
-  function handleMinimize() {
-    setIsFullscreen(false);
-    setIsMinimized(true);
-  }
+  // ── Closed ──
+  if (mode === "closed") return null;
 
-  function handleFullscreen() {
-    setIsMinimized(false);
-    setIsFullscreen(!isFullscreen);
-  }
-
-  // Restore from minimized
-  function handleRestore() {
-    setIsMinimized(false);
-    setIsVisible(true);
-  }
-
-  const isCurrentlyTyping = typingText.current.length > 0 && !isDone.current;
-
-  // Render a single terminal line
-  function renderLine(line: TerminalLine, idx: number) {
-    const isCommand = line.type === "command" && line.copyText;
-    const isCopied = copiedLine === idx;
-
+  // ── Minimized: circle with Locker logo, left-aligned with nav logo (left: 40px) ──
+  if (mode === "minimized") {
     return (
       <div
-        key={idx}
-        onClick={isCommand ? () => handleCopyLine(line.copyText!, idx) : undefined}
-        style={{
-          color: COLORS[line.type],
-          height: `${LINE_HEIGHT}px`,
-          lineHeight: `${LINE_HEIGHT}px`,
-          cursor: isCommand ? "pointer" : "default",
-          borderRadius: isCommand ? "4px" : undefined,
-          padding: isCommand ? "0 4px" : undefined,
-          margin: isCommand ? "0 -4px" : undefined,
-          background: isCopied ? "rgba(50,215,75,0.08)" : isCommand ? undefined : undefined,
-          transition: "background 200ms ease",
-          display: "flex",
-          alignItems: "center",
-          position: "relative",
-        }}
-        onMouseEnter={(e) => {
-          if (isCommand && !isCopied) e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-        }}
-        onMouseLeave={(e) => {
-          if (isCommand && !isCopied) e.currentTarget.style.background = "transparent";
-        }}
-      >
-        {isCommand ? (
-          <>
-            {/* $ prefix — not selectable, not copied on triple-click */}
-            <span style={{ userSelect: "none", WebkitUserSelect: "none", color: "rgba(255,255,255,0.3)" }}>
-              ${"\u00A0"}
-            </span>
-            <span>{line.text.slice(2)}</span>
-            {/* Copied indicator */}
-            {isCopied && (
-              <span style={{
-                marginLeft: "auto",
-                fontSize: "11px",
-                color: "#32d74b",
-                fontWeight: 500,
-                paddingRight: "4px",
-              }}>
-                copied
-              </span>
-            )}
-          </>
-        ) : (
-          <span style={{ minHeight: line.text === "" ? `${LINE_HEIGHT}px` : undefined, display: "inline-block" }}>
-            {line.text}
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  if (isMinimized) {
-    return (
-      <div
-        onClick={handleRestore}
+        onClick={() => setMode("normal")}
         style={{
           position: "fixed",
           left: "40px",
-          top: "60px",
+          top: "50%",
+          transform: "translateY(-50%)",
           zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "10px 16px",
-          borderRadius: "100px",
-          background: "rgba(30,30,30,0.9)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          width: "44px",
+          height: "44px",
+          borderRadius: "50%",
+          background: "rgba(30,30,30,0.95)",
+          border: "1px solid rgba(255,255,255,0.12)",
           backdropFilter: "blur(20px)",
           cursor: "pointer",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+          e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+          e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
         }}
+        title="Restore terminal"
       >
-        <LockerLogo size={18} />
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
-          Terminal
-        </span>
+        <LockerLogo size={20} />
       </div>
     );
   }
 
-  // ── Hidden (closed) ──
-  if (!isVisible) {
-    return null;
-  }
-
-  // ── Stoplight dot with hover symbol ──
-  function StoplightDot({
-    color,
-    symbol,
-    id,
-    onClick,
-  }: {
-    color: string;
-    symbol: string;
-    id: string;
-    onClick: () => void;
-  }) {
-    const isHovered = hoveredDot === id;
+  // ── Stoplight dot ──
+  function Dot({ color, sym, id, fn }: { color: string; sym: string; id: string; fn: () => void }) {
     return (
       <div
-        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        onClick={(e) => { e.stopPropagation(); fn(); }}
         onMouseEnter={() => setHoveredDot(id)}
         onMouseLeave={() => setHoveredDot(null)}
         style={{
-          width: "12px",
-          height: "12px",
-          borderRadius: "50%",
-          background: color,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          transition: "transform 100ms ease",
-          transform: isHovered ? "scale(1.15)" : "scale(1)",
+          width: 12, height: 12, borderRadius: "50%", background: color,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", transition: "transform 100ms ease",
+          transform: hoveredDot === id ? "scale(1.15)" : "scale(1)",
         }}
       >
         {hoveredDot !== null && (
-          <span style={{
-            fontSize: "8px",
-            fontWeight: 800,
-            lineHeight: 1,
-            color: "rgba(0,0,0,0.5)",
-          }}>
-            {symbol}
+          <span style={{ fontSize: "8px", fontWeight: 800, lineHeight: 1, color: "rgba(0,0,0,0.5)" }}>
+            {sym}
           </span>
         )}
       </div>
     );
   }
 
-  return (
-    <div
-      ref={wrapperRef}
-      style={{
-        borderRadius: isFullscreen ? "0" : "16px",
-        overflow: "hidden",
-        border: isFullscreen ? "none" : "1px solid rgba(255,255,255,0.06)",
-        boxShadow: isFullscreen ? "none" : "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
-        transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
-        ...(isFullscreen
-          ? {
-              position: "fixed" as const,
-              inset: 0,
-              zIndex: 9999,
-            }
-          : {}),
-      }}
-    >
-      {/* Title bar */}
+  // ── Line renderer ──
+  function Line({ line, idx }: { line: TerminalLine; idx: number }) {
+    const cmd = line.type === "command" && line.copyText;
+    const copied = copiedLine === idx;
+    return (
       <div
+        onClick={cmd ? () => copyLine(line.copyText!, idx) : undefined}
         style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "12px 16px",
-          background: "#1a1a1a",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          gap: "8px",
+          color: COLORS[line.type], height: LH, lineHeight: `${LH}px`,
+          cursor: cmd ? "pointer" : "default",
+          borderRadius: cmd ? 4 : undefined,
+          padding: cmd ? "0 4px" : undefined, margin: cmd ? "0 -4px" : undefined,
+          background: copied ? "rgba(50,215,75,0.08)" : "transparent",
+          transition: "background 200ms ease",
+          display: "flex", alignItems: "center",
+        }}
+        onMouseEnter={(e) => { if (cmd && !copied) e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
+        onMouseLeave={(e) => { if (cmd && !copied) e.currentTarget.style.background = "transparent"; }}
+      >
+        {cmd ? (
+          <>
+            <span style={{ userSelect: "none", WebkitUserSelect: "none", color: "rgba(255,255,255,0.3)" }}>${"\u00A0"}</span>
+            <span>{line.text.slice(2)}</span>
+            {copied && <span style={{ marginLeft: "auto", fontSize: 11, color: "#32d74b", fontWeight: 500, paddingRight: 4 }}>copied</span>}
+          </>
+        ) : (
+          <span style={{ minHeight: line.text === "" ? LH : undefined, display: "inline-block" }}>{line.text}</span>
+        )}
+      </div>
+    );
+  }
+
+  const isFS = mode === "fullscreen";
+
+  // ── Main render ──
+  return (
+    <>
+      {/* Fullscreen backdrop */}
+      {isFS && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 9998,
+            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+          }}
+          onClick={() => setMode("normal")}
+        />
+      )}
+
+      <div
+        style={isFS ? {
+          position: "fixed",
+          top: "5vh", left: "5vw", right: "5vw", bottom: "5vh",
+          zIndex: 9999,
+          borderRadius: "16px",
+          overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
+          transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+          display: "flex", flexDirection: "column",
+        } : {
+          borderRadius: "16px",
+          overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
+          transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
-        <div
-          style={{ display: "flex", gap: "7px" }}
-          onMouseLeave={() => setHoveredDot(null)}
-        >
-          <StoplightDot color="#ff5f57" symbol="✕" id="close" onClick={handleClose} />
-          <StoplightDot color="#febc2e" symbol="−" id="minimize" onClick={handleMinimize} />
-          <StoplightDot color="#28c840" symbol="⤢" id="fullscreen" onClick={handleFullscreen} />
+        {/* Title bar */}
+        <div style={{
+          display: "flex", alignItems: "center", padding: "12px 16px",
+          background: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.06)", gap: 8,
+          flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", gap: 7 }} onMouseLeave={() => setHoveredDot(null)}>
+            <Dot color="#ff5f57" sym="✕" id="c" fn={() => { setMode("closed"); }} />
+            <Dot color="#febc2e" sym="−" id="m" fn={() => { setMode("minimized"); }} />
+            <Dot color="#28c840" sym="⤢" id="f" fn={() => { setMode(isFS ? "normal" : "fullscreen"); }} />
+          </div>
+          <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
+            locker &mdash; zsh
+          </span>
+          <div style={{ width: 52 }} />
         </div>
-        <span
+
+        {/* Body */}
+        <div
+          ref={bodyRef}
           style={{
-            flex: 1,
-            textAlign: "center",
-            fontSize: "12px",
-            color: "rgba(255,255,255,0.35)",
+            padding: `${BODY_PAD}px 22px`,
+            background: "#0d0d0d",
             fontFamily: "var(--font-mono)",
+            fontSize: "13.5px",
+            height: isFS ? "100%" : BODY_H,
+            overflow: isFS ? "auto" : "hidden",
+            flex: isFS ? 1 : undefined,
           }}
         >
-          locker &mdash; zsh
-        </span>
-        <div style={{ width: 52 }} />
+          {completedLines.current.map((line, i) => <Line key={i} line={line} idx={i} />)}
+
+          {typing && (
+            <div style={{ color: COLORS.command, height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
+              <span style={{ userSelect: "none", color: "rgba(255,255,255,0.3)" }}>${"\u00A0"}</span>
+              {typingText.current.slice(2)}
+              <span style={{ display: "inline-block", width: 7, height: 15, background: "rgba(255,255,255,0.7)", marginLeft: 1, animation: "blink 1s step-end infinite" }} />
+            </div>
+          )}
+
+          {isDone.current && (
+            <div style={{ color: "rgba(255,255,255,0.4)", height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
+              <span style={{ userSelect: "none" }}>$&nbsp;</span>
+              <span style={{ display: "inline-block", width: 7, height: 15, background: "rgba(255,255,255,0.7)", animation: "blink 1s step-end infinite" }} />
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Body — fixed height, no expansion */}
-      <div
-        ref={containerRef}
-        style={{
-          padding: `${BODY_PADDING}px 22px`,
-          background: "#0d0d0d",
-          fontFamily: "var(--font-mono)",
-          fontSize: "13.5px",
-          height: isFullscreen ? "calc(100vh - 44px)" : `${BODY_HEIGHT}px`,
-          overflow: "hidden",
-          transition: "height 400ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-      >
-        {completedLines.current.map((line, i) => renderLine(line, i))}
-
-        {/* Typing line */}
-        {isCurrentlyTyping && (
-          <div style={{
-            color: COLORS.command,
-            height: `${LINE_HEIGHT}px`,
-            lineHeight: `${LINE_HEIGHT}px`,
-            display: "flex",
-            alignItems: "center",
-          }}>
-            <span style={{ userSelect: "none", color: "rgba(255,255,255,0.3)" }}>
-              ${"\u00A0"}
-            </span>
-            {typingText.current.slice(2)}
-            <span
-              style={{
-                display: "inline-block",
-                width: "7px",
-                height: "15px",
-                background: "rgba(255,255,255,0.7)",
-                marginLeft: "1px",
-                animation: "blink 1s step-end infinite",
-              }}
-            />
-          </div>
-        )}
-
-        {/* Frozen idle prompt */}
-        {isDone.current && (
-          <div style={{
-            color: "rgba(255,255,255,0.4)",
-            height: `${LINE_HEIGHT}px`,
-            lineHeight: `${LINE_HEIGHT}px`,
-            display: "flex",
-            alignItems: "center",
-          }}>
-            <span style={{ userSelect: "none" }}>$&nbsp;</span>
-            <span
-              style={{
-                display: "inline-block",
-                width: "7px",
-                height: "15px",
-                background: "rgba(255,255,255,0.7)",
-                animation: "blink 1s step-end infinite",
-              }}
-            />
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
