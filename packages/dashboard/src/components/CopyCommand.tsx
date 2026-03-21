@@ -58,34 +58,31 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green gradient fill — sweeps from right to left, fills entire tile */}
+      {/* Green fill — full coverage, fades in */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(to left, rgba(50, 215, 75, 0.15) 0%, rgba(50, 215, 75, 0.06) 60%, transparent 100%)",
+          background: "linear-gradient(to left, rgba(50, 215, 75, 0.18) 0%, rgba(50, 215, 75, 0.08) 70%, rgba(50, 215, 75, 0.03) 100%)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transform: isCopied ? "translateX(0)" : "translateX(100%)",
-          transition: isCopied
-            ? "transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease"
-            : "transform 300ms ease, opacity 100ms ease",
+          transition: isCopied ? "opacity 200ms ease" : "opacity 100ms ease",
         }}
       />
-      {/* Bright orb accent on right — stays on right, doesn't move */}
+      {/* Bright orb — inside right edge */}
       <div
         style={{
           position: "absolute",
-          top: "-25px",
-          right: "-15px",
-          width: "140px",
-          height: "140px",
+          top: "-10px",
+          right: "5px",
+          width: "100px",
+          height: "100px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.4) 0%, rgba(50, 215, 75, 0.1) 40%, transparent 70%)",
-          filter: "blur(18px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.35) 0%, transparent 65%)",
+          filter: "blur(14px)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transition: isCopied ? "opacity 250ms ease 100ms" : "opacity 80ms ease",
+          transition: isCopied ? "opacity 200ms ease" : "opacity 80ms ease",
         }}
       />
 
@@ -131,42 +128,24 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
           {isCopied ? (
             <motion.svg
               key="check"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#32d74b"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ scale: 0, rotate: -45 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: "spring", damping: 15, stiffness: 300 }}
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="#32d74b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              initial={{ scale: 0.3, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.3, opacity: 0 }}
+              transition={{ duration: 0.15, ease: [0.34, 1.56, 0.64, 1] }}
             >
-              <motion.polyline
-                points="20 6 9 17 4 12"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
-                style={{ strokeDasharray: 1, strokeDashoffset: 0 }}
-              />
+              <polyline points="20 6 9 17 4 12" />
             </motion.svg>
           ) : (
             <motion.svg
               key="copy"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(255,255,255,0.3)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ scale: 0, opacity: 0 }}
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+              initial={{ scale: 0.3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              exit={{ scale: 0.3, opacity: 0 }}
+              transition={{ duration: 0.12 }}
             >
               <rect x="9" y="9" width="13" height="13" rx="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />

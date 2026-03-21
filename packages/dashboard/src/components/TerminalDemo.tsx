@@ -49,6 +49,7 @@ export function TerminalDemo() {
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
+  const [fsExiting, setFsExiting] = useState(false);
 
   const completedLines = useRef<TerminalLine[]>([]);
   const typingText = useRef("");
@@ -83,7 +84,13 @@ export function TerminalDemo() {
   // Esc exits fullscreen
   useEffect(() => {
     if (mode !== "fullscreen") return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMode("normal"); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setFsExiting(true);
+        setMode("normal");
+        setTimeout(() => setFsExiting(false), 500);
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [mode]);
@@ -319,17 +326,28 @@ export function TerminalDemo() {
     );
   }
 
-  // ── Fullscreen — animate from inline rect to fullscreen rect ──
-  if (isFS && mounted) {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const pad = 0.03; // 3% padding
+  // ── Fullscreen — portaled, with enter AND exit animation ──
+  const showFullscreen = (isFS || fsExiting) && mounted;
+
+  function exitFullscreen() {
+    setFsExiting(true);
+    setMode("normal");
+    // Keep portal mounted for 500ms to play exit animation
+    setTimeout(() => setFsExiting(false), 500);
+  }
+
+  if (showFullscreen) {
+    const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
+    const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+    const pad = 0.03;
     const fsX = vw * pad;
     const fsY = vh * pad;
     const fsW = vw * (1 - pad * 2);
     const fsH = vh * (1 - pad * 2);
-
     const sr = sourceRect || { left: vw * 0.15, top: vh * 0.3, width: vw * 0.7, height: vh * 0.4 };
+
+    // Are we currently expanded or collapsing?
+    const expanded = isFS && !fsExiting;
 
     return (
       <>
@@ -338,34 +356,22 @@ export function TerminalDemo() {
         </div>
         {createPortal(
           <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
+              animate={{ opacity: expanded ? 1 : 0 }}
+              transition={{ duration: 0.25 }}
               style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
-              onClick={() => setMode("normal")}
+              onClick={exitFullscreen}
             />
+            {/* Window */}
             <motion.div
-              initial={{
-                x: sr.left,
-                y: sr.top,
-                width: sr.width,
-                height: sr.height,
-                borderRadius: 16,
-              }}
               animate={{
-                x: fsX,
-                y: fsY,
-                width: fsW,
-                height: fsH,
-                borderRadius: 12,
-              }}
-              exit={{
-                x: sr.left,
-                y: sr.top,
-                width: sr.width,
-                height: sr.height,
-                borderRadius: 16,
+                x: expanded ? fsX : sr.left,
+                y: expanded ? fsY : sr.top,
+                width: expanded ? fsW : sr.width,
+                height: expanded ? fsH : sr.height,
+                borderRadius: expanded ? 12 : 16,
+                opacity: expanded ? 1 : 0.9,
               }}
               transition={{
                 type: "spring",
@@ -374,17 +380,29 @@ export function TerminalDemo() {
                 mass: 0.8,
               }}
               style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                zIndex: 9999,
+                position: "fixed", top: 0, left: 0, zIndex: 9999,
                 overflow: "hidden",
                 border: "1px solid rgba(255,255,255,0.1)",
                 boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
                 display: "flex", flexDirection: "column",
               }}
             >
-              {titleBar}
+              {/* Inline titlebar for fullscreen (with exit function) */}
+              <div style={{
+                display: "flex", alignItems: "center", padding: "12px 16px",
+                background: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.06)", gap: 8,
+                flexShrink: 0,
+              }}>
+                <div style={{ display: "flex", gap: 0, margin: "-8px", marginRight: 0 }} onMouseLeave={() => setHoveredDot(null)}>
+                  <Dot color="#ff5f57" sym="✕" id="c" fn={() => { exitFullscreen(); setTimeout(() => setMode("closed"), 500); }} />
+                  <Dot color="#febc2e" sym="−" id="m" fn={() => { exitFullscreen(); setTimeout(() => setMode("minimized"), 500); }} />
+                  <Dot color="#28c840" sym="⤢" id="f" fn={exitFullscreen} />
+                </div>
+                <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
+                  locker &mdash; zsh
+                </span>
+                <div style={{ width: 52 }} />
+              </div>
               <div style={{
                 padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
                 fontFamily: "var(--font-mono)", fontSize: "13.5px",
