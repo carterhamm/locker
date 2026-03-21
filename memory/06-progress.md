@@ -20,29 +20,32 @@ type: project
 
 ## Phase 2 — CLI (COMPLETE)
 - [x] npm package scaffold with Commander.js (bin: locker)
-- [x] Config module (~/.locker/config, chmod 600, read/write/clear)
+- [x] Config module (~/.locker/config, chmod 600)
 - [x] API client (authenticated + unauthenticated, error handling)
-- [x] `locker login` — email/password auth, stores JWT + API URL
-- [x] `locker login --register` — create new account
-- [x] `locker get <service>` — retrieves key to stdout only, --agent flag for audit
-- [x] `locker set <service> <key>` — stores encrypted key via API
-- [x] `locker list` — shows service names (never key values)
-- [x] `locker revoke <service>` — deletes key
-- [x] `locker whoami` — shows logged-in email
-- [x] `locker logout` — clears ~/.locker/config
-- [x] Error handling: expired token (prompt re-login), network error, not found
-- [x] 14 CLI tests passing (config, commands, API client)
+- [x] All 7 commands: login, logout, whoami, get, set, list, revoke
+- [x] 14 CLI tests passing
+
+## Phase 3 — Dashboard (COMPLETE)
+- [x] Next.js App Router on port 5003
+- [x] Dual theme system: Modern (black/white gradients, Sora+DM Sans) + Terminal (macOS chrome, Menlo, green accent)
+- [x] ThemeProvider with localStorage persistence
+- [x] ThemeToggle on landing nav + Settings page as account preference
+- [x] Landing page: hero, features grid, code examples, CTA — both modes
+- [x] Auth pages: login + register — both modes
+- [x] Dashboard layout with nav (Keys, Logs, Settings)
+- [x] Keys page: list, add, revoke
+- [x] Logs page: access log table
+- [x] Settings page: account info, theme selector, CLI quick start
+- [x] API proxy via Next.js rewrites (port 3001)
+- [x] Production build passes with zero errors
 
 ## Total: 41 tests passing (27 API + 14 CLI)
 
-## Phase 3 — Dashboard
-Not started. Next up.
-
 ## Phase 4 — MCP Server
-Not started.
+Not started. Next up.
 
 ## Blockers
 None.
 
 ## Session Log
-- 2026-03-20: Completed Phase 1 (backend API) and Phase 2 (CLI). All 41 tests passing.
+- 2026-03-20: Completed Phase 1 (API), Phase 2 (CLI), Phase 3 (Dashboard). All builds pass, all 41 tests pass.
