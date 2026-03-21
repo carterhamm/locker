@@ -1,0 +1,21 @@
+{
+  "name": "locker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Secure API credential manager for AI agents and developers",
+  "workspaces": [
+    "packages/api",
+    "packages/cli",
+    "packages/dashboard"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev --workspace=packages/api",
+    "dev:dashboard": "npm run dev --workspace=packages/dashboard",
+    "test": "npm run test --workspace=packages/api",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

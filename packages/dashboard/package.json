@@ -1,0 +1,7 @@
+{
+  "name": "@locker/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Locker web dashboard — manage keys, view usage, billing",
+  "scripts": {}
+}
