@@ -141,7 +141,7 @@ export function TerminalDemo() {
 
   if (mode === "closed") return null;
 
-  // ── Stoplight dot ──
+  // ── Stoplight dot — large tap area via padding ──
   function Dot({ color, sym, id, fn }: { color: string; sym: string; id: string; fn: () => void }) {
     return (
       <div
@@ -149,17 +149,24 @@ export function TerminalDemo() {
         onMouseEnter={() => setHoveredDot(id)}
         onMouseLeave={() => setHoveredDot(null)}
         style={{
-          width: 12, height: 12, borderRadius: "50%", background: color,
+          padding: "6px",
+          margin: "-6px",
+          cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", transition: "transform 100ms ease",
-          transform: hoveredDot === id ? "scale(1.15)" : "scale(1)",
         }}
       >
-        {hoveredDot !== null && (
-          <span style={{ fontSize: "8px", fontWeight: 800, lineHeight: 1, color: "rgba(0,0,0,0.5)" }}>
-            {sym}
-          </span>
-        )}
+        <div style={{
+          width: 12, height: 12, borderRadius: "50%", background: color,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "transform 100ms ease",
+          transform: hoveredDot === id ? "scale(1.15)" : "scale(1)",
+        }}>
+          {hoveredDot !== null && (
+            <span style={{ fontSize: "8px", fontWeight: 800, lineHeight: 1, color: "rgba(0,0,0,0.5)" }}>
+              {sym}
+            </span>
+          )}
+        </div>
       </div>
     );
   }
@@ -244,14 +251,34 @@ export function TerminalDemo() {
         </div>
         {createPortal(
           <motion.div
-            initial={{ scale: 0, borderRadius: "16px", width: 300, height: BODY_H + 44, opacity: 0.5 }}
-            animate={{ scale: 1, borderRadius: "50%", width: 44, height: 44, opacity: 1 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
+            initial={{
+              borderRadius: "16px",
+              width: 200,
+              height: 120,
+              opacity: 0,
+              x: 0,
+              y: 0,
+            }}
+            animate={{
+              borderRadius: "50%",
+              width: 44,
+              height: 44,
+              opacity: 1,
+              x: 0,
+              y: 0,
+            }}
+            transition={{
+              type: "spring",
+              damping: 22,
+              stiffness: 200,
+              mass: 1,
+              opacity: { duration: 0.3, ease: "easeOut" },
+            }}
             onClick={handleRestore}
             style={{
               position: "fixed",
               left: "8px",
-              top: "50%",
+              top: "60%",
               translateY: "-50%",
               zIndex: 1000,
               background: "rgba(30,30,30,0.95)",
@@ -299,11 +326,16 @@ export function TerminalDemo() {
               onClick={() => setMode("normal")}
             />
             <motion.div
-              layoutId="terminal-window"
-              initial={{ top: "30%", left: "10%", right: "10%", bottom: "30%", borderRadius: "16px" }}
-              animate={{ top: "3vh", left: "3vw", right: "3vw", bottom: "3vh", borderRadius: "12px" }}
-              exit={{ top: "30%", left: "10%", right: "10%", bottom: "30%", borderRadius: "16px" }}
-              transition={{ type: "spring", damping: 28, stiffness: 260, mass: 0.9 }}
+              initial={{ top: "20%", left: "15%", right: "15%", bottom: "20%", borderRadius: "16px", opacity: 0.8 }}
+              animate={{ top: "3vh", left: "3vw", right: "3vw", bottom: "3vh", borderRadius: "12px", opacity: 1 }}
+              exit={{ top: "20%", left: "15%", right: "15%", bottom: "20%", borderRadius: "16px", opacity: 0 }}
+              transition={{
+                type: "spring",
+                damping: 30,
+                stiffness: 250,
+                mass: 0.8,
+                opacity: { duration: 0.2 },
+              }}
               style={{
                 position: "fixed", zIndex: 9999,
                 overflow: "hidden",
@@ -332,8 +364,6 @@ export function TerminalDemo() {
   return (
     <div ref={wrapperRef}>
       <motion.div
-        layoutId="terminal-window"
-        transition={{ type: "spring", damping: 28, stiffness: 260, mass: 0.9 }}
         style={{
           borderRadius: "16px", overflow: "hidden",
           border: "1px solid rgba(255,255,255,0.06)",
