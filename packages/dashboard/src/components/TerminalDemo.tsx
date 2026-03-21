@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 interface TerminalLine {
   text: string;
   type: "command" | "output" | "comment" | "success";
-  delay: number; // ms after previous line completes
+  delay: number;
 }
 
 const DEMO_LINES: TerminalLine[] = [
-  { text: "# Install the CLI", type: "comment", delay: 300 },
-  { text: "$ npm install -g locker-cli", type: "command", delay: 100 },
-  { text: "added 42 packages in 2.1s", type: "output", delay: 800 },
-  { text: "", type: "output", delay: 400 },
-  { text: "# Login once — that's it", type: "comment", delay: 200 },
-  { text: "$ locker login", type: "command", delay: 100 },
-  { text: "Email: carter@nexus-ai.com", type: "output", delay: 600 },
-  { text: "✓ Logged in as carter@nexus-ai.com", type: "success", delay: 500 },
-  { text: "", type: "output", delay: 400 },
-  { text: "# Any agent retrieves keys instantly", type: "comment", delay: 200 },
-  { text: "$ locker get openai", type: "command", delay: 100 },
-  { text: "sk-proj-aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 400 },
+  { text: "# Install the CLI", type: "comment", delay: 500 },
+  { text: "$ npm install -g locker-cli", type: "command", delay: 200 },
+  { text: "added 42 packages in 2.1s", type: "output", delay: 1200 },
   { text: "", type: "output", delay: 600 },
-  { text: "$ locker get resend", type: "command", delay: 100 },
-  { text: "re_aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 400 },
+  { text: "# Login once — that's it", type: "comment", delay: 400 },
+  { text: "$ locker login", type: "command", delay: 200 },
+  { text: "Email: carter@nexus-ai.com", type: "output", delay: 900 },
+  { text: "✓ Logged in as carter@nexus-ai.com", type: "success", delay: 700 },
+  { text: "", type: "output", delay: 700 },
+  { text: "# Any agent retrieves keys instantly", type: "comment", delay: 400 },
+  { text: "$ locker get openai", type: "command", delay: 200 },
+  { text: "sk-proj-aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 600 },
+  { text: "", type: "output", delay: 900 },
+  { text: "$ locker get resend", type: "command", delay: 200 },
+  { text: "re_aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 600 },
 ];
 
 export function TerminalDemo() {
@@ -32,17 +32,26 @@ export function TerminalDemo() {
   const [currentTyped, setCurrentTyped] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [started, setStarted] = useState(false);
+  const [done, setDone] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Start when visible
+  // Clean up any pending timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  // Start when visible (once)
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || started) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !started) {
+        if (entry.isIntersecting) {
           setStarted(true);
-          observer.unobserve(el);
+          observer.disconnect();
         }
       },
       { threshold: 0.3 }
@@ -51,14 +60,17 @@ export function TerminalDemo() {
     return () => observer.disconnect();
   }, [started]);
 
-  // Animate lines
+  // Main animation driver
   useEffect(() => {
-    if (!started || visibleLines >= DEMO_LINES.length) return;
+    if (!started || done) return;
+    if (visibleLines >= DEMO_LINES.length) {
+      setDone(true);
+      return;
+    }
 
     const line = DEMO_LINES[visibleLines];
 
     if (line.type === "command" && !isTyping) {
-      // Start typing this command
       setIsTyping(true);
       setCurrentTyped("");
       setTypingIndex(0);
@@ -68,29 +80,27 @@ export function TerminalDemo() {
     if (isTyping) {
       const text = DEMO_LINES[visibleLines].text;
       if (typingIndex < text.length) {
-        const timer = setTimeout(() => {
+        timerRef.current = setTimeout(() => {
           setCurrentTyped(text.slice(0, typingIndex + 1));
           setTypingIndex(typingIndex + 1);
-        }, 30 + Math.random() * 30); // Variable typing speed
-        return () => clearTimeout(timer);
+        }, 45 + Math.random() * 40);
+        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
       } else {
-        // Done typing this line
         setIsTyping(false);
-        const timer = setTimeout(() => {
-          setVisibleLines(visibleLines + 1);
-        }, 150);
-        return () => clearTimeout(timer);
+        timerRef.current = setTimeout(() => {
+          setVisibleLines((v) => v + 1);
+        }, 250);
+        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
       }
     }
 
-    // Non-command lines just appear after their delay
-    const timer = setTimeout(() => {
-      setVisibleLines(visibleLines + 1);
+    timerRef.current = setTimeout(() => {
+      setVisibleLines((v) => v + 1);
     }, line.delay);
-    return () => clearTimeout(timer);
-  }, [started, visibleLines, isTyping, typingIndex]);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [started, done, visibleLines, isTyping, typingIndex]);
 
-  // Auto-scroll terminal
+  // Auto-scroll
   useEffect(() => {
     const el = containerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -152,8 +162,8 @@ export function TerminalDemo() {
           fontFamily: "var(--font-mono)",
           fontSize: "13.5px",
           lineHeight: "1.7",
-          minHeight: "320px",
-          maxHeight: "380px",
+          minHeight: "340px",
+          maxHeight: "400px",
           overflow: "auto",
         }}
       >
@@ -164,7 +174,6 @@ export function TerminalDemo() {
               color: colorMap[line.type],
               opacity: 0,
               animation: "termLineIn 0.3s ease forwards",
-              animationDelay: "0ms",
               minHeight: line.text === "" ? "12px" : undefined,
             }}
           >
@@ -172,7 +181,7 @@ export function TerminalDemo() {
           </div>
         ))}
         {/* Currently typing line */}
-        {isTyping && (
+        {isTyping && !done && (
           <div style={{ color: colorMap["command"] }}>
             {currentTyped}
             <span
@@ -188,8 +197,8 @@ export function TerminalDemo() {
             />
           </div>
         )}
-        {/* Idle cursor */}
-        {!isTyping && visibleLines >= DEMO_LINES.length && (
+        {/* Frozen idle cursor — stays forever once done */}
+        {done && (
           <div style={{ color: "rgba(255,255,255,0.4)", marginTop: "4px" }}>
             ${" "}
             <span

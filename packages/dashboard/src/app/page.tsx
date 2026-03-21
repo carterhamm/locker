@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { TerminalDemo } from "@/components/TerminalDemo";
+import { CopyCommand } from "@/components/CopyCommand";
 import {
   ShieldLockIcon,
   AuditLogIcon,
@@ -331,6 +332,19 @@ export default function LandingPage() {
         <ScrollReveal>
           <TerminalDemo />
         </ScrollReveal>
+
+        {/* Tap-to-copy commands */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "24px" }}>
+          <ScrollReveal delay={100}>
+            <CopyCommand command="npm install -g locker-cli" label="Install" />
+          </ScrollReveal>
+          <ScrollReveal delay={180}>
+            <CopyCommand command="locker login" label="Authenticate" />
+          </ScrollReveal>
+          <ScrollReveal delay={260}>
+            <CopyCommand command="locker get openai" label="Retrieve a key" />
+          </ScrollReveal>
+        </div>
       </section>
 
       {/* ── Features Grid ── */}
