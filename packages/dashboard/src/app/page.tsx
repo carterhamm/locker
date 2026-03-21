@@ -18,12 +18,6 @@ import {
   LockerLogo,
 } from "@/components/Icons";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const LiquidGlass = dynamic(
-  () => import("@/components/LiquidGlass/LiquidGlass").then(m => m.LiquidGlass),
-  { ssr: false }
-);
 
 const PAGE_PADDING = 40;
 const MAX_WIDTH = 1200;
@@ -206,41 +200,28 @@ export default function LandingPage() {
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <LiquidGlass
-            shape="pill"
-            width={105}
-            height={36}
-            draggable={false}
-            thickness={3.0}
-            ior={1.45}
-            opacity={0.85}
-            blurRadius={12}
-            aberrationIntensity={0.8}
-            borderRadius={0.5}
-            morphThreshold={0}
+          <a
+            href="https://github.com/carterhamm"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "7px",
+              padding: "8px 16px",
+              borderRadius: "100px",
+              border: "1px solid var(--border-medium)",
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-body)",
+              fontSize: "13px",
+              fontWeight: 500,
+              textDecoration: "none",
+              transition: `all var(--duration-normal) var(--ease-out-expo)`,
+            }}
           >
-            <a
-              href="https://github.com/carterhamm"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "7px",
-                padding: "8px 16px",
-                color: "var(--text-secondary)",
-                fontFamily: "var(--font-body)",
-                fontSize: "13px",
-                fontWeight: 500,
-                textDecoration: "none",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              <GitHubIcon size={16} />
-              GitHub
-            </a>
-          </LiquidGlass>
+            <GitHubIcon size={16} />
+            GitHub
+          </a>
           <Link
             href={user ? "/dashboard" : "/auth"}
             style={{
