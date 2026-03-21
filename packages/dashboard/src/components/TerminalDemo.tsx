@@ -15,18 +15,19 @@ const LINES: TerminalLine[] = [
   { text: "# Install the CLI", type: "comment", delay: 500 },
   { text: "$ npm install -g locker-cli", type: "command", delay: 200, copyText: "npm install -g locker-cli" },
   { text: "added 42 packages in 2.1s", type: "output", delay: 1200 },
-  { text: "", type: "output", delay: 600 },
+  { text: "", type: "output", delay: 400 },
   { text: "# Login once — that's it", type: "comment", delay: 400 },
   { text: "$ locker login", type: "command", delay: 200, copyText: "locker login" },
   { text: "Email: george@harrison.com", type: "output", delay: 900 },
   { text: "✓ Logged in as george@harrison.com", type: "success", delay: 700 },
-  { text: "", type: "output", delay: 700 },
+  { text: "", type: "output", delay: 400 },
   { text: "# Any agent retrieves keys instantly", type: "comment", delay: 400 },
   { text: "$ locker get openai", type: "command", delay: 200, copyText: "locker get openai" },
   { text: "sk-proj-aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 600 },
-  { text: "", type: "output", delay: 900 },
+  { text: "", type: "output", delay: 500 },
   { text: "$ locker get resend", type: "command", delay: 200, copyText: "locker get resend" },
   { text: "re_aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 600 },
+  { text: "", type: "output", delay: 400 },
 ];
 
 const COLORS: Record<string, string> = {
@@ -129,26 +130,19 @@ export function TerminalDemo() {
     setTimeout(() => setCopiedLine(null), 2000);
   }, []);
 
-  // Close (red) — shrink and hide
   function handleClose() {
     setIsFullscreen(false);
     setIsVisible(false);
   }
 
-  // Minimize (yellow) — shrink to a small logo pill on the left
   function handleMinimize() {
     setIsFullscreen(false);
     setIsMinimized(true);
   }
 
-  // Fullscreen (green)
   function handleFullscreen() {
-    if (isFullscreen) {
-      setIsFullscreen(false);
-    } else {
-      setIsMinimized(false);
-      setIsFullscreen(true);
-    }
+    setIsMinimized(false);
+    setIsFullscreen(!isFullscreen);
   }
 
   // Restore from minimized
@@ -218,16 +212,14 @@ export function TerminalDemo() {
     );
   }
 
-  // ── Minimized pill (fixed left side, vertically centered) ──
   if (isMinimized) {
     return (
       <div
         onClick={handleRestore}
         style={{
           position: "fixed",
-          left: "20px",
-          top: "50%",
-          transform: "translateY(-50%)",
+          left: "40px",
+          top: "60px",
           zIndex: 1000,
           display: "flex",
           alignItems: "center",
@@ -242,11 +234,11 @@ export function TerminalDemo() {
           transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-50%) scale(1.05)";
+          e.currentTarget.style.transform = "scale(1.05)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+          e.currentTarget.style.transform = "scale(1)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
         }}
       >
@@ -409,7 +401,7 @@ export function TerminalDemo() {
             display: "flex",
             alignItems: "center",
           }}>
-            <span style={{ userSelect: "none" }}>$ </span>
+            <span style={{ userSelect: "none" }}>$&nbsp;</span>
             <span
               style={{
                 display: "inline-block",

@@ -338,7 +338,7 @@ export default function LandingPage() {
           margin: "0 auto",
         }}
       >
-        <ScrollReveal>
+        <ScrollReveal style={{ overflow: "visible" }}>
           <TerminalDemo />
         </ScrollReveal>
 

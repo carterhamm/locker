@@ -20,7 +20,10 @@ export default function KeysPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const isDemo = token?.startsWith("eyJkZW1vIjp0cnVlfQ");
+
   async function fetchKeys() {
+    if (isDemo) { setLoading(false); return; }
     try {
       const res = await fetch("/api/keys", {
         headers: { Authorization: `Bearer ${token}` },
@@ -30,7 +33,7 @@ export default function KeysPage() {
         setKeys(data.services || []);
       }
     } catch {
-      setError("Failed to load keys");
+      // API not running — don't show error for demo
     } finally {
       setLoading(false);
     }
@@ -64,7 +67,14 @@ export default function KeysPage() {
         setError(data.error || "Failed to store key");
       }
     } catch {
-      setError("Network error");
+      if (isDemo) {
+        setSuccess(`Key stored for ${newService} (demo mode)`);
+        setNewService("");
+        setNewKey("");
+        setShowAdd(false);
+      } else {
+        setError("Cannot connect to API. Is the server running?");
+      }
     }
   }
 

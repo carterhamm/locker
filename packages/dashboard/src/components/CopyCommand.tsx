@@ -61,21 +61,32 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green glow — starts on right, stays on right. Rich and solid. */}
+      {/* Green glow — gradient that sweeps from right, fills tile */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to left, rgba(50, 215, 75, 0.18) 0%, rgba(50, 215, 75, 0.06) 50%, transparent 100%)",
+          pointerEvents: "none",
+          opacity: isCopied ? 1 : 0,
+          transform: isCopied ? "translateX(0)" : "translateX(100%)",
+          transition: "opacity 200ms ease, transform 500ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      />
+      {/* Bright accent orb on right edge */}
       <div
         style={{
           position: "absolute",
           top: "-20px",
-          right: "-10px",
-          width: "160px",
-          height: "140px",
+          right: "-20px",
+          width: "120px",
+          height: "120px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.55) 0%, rgba(50, 215, 75, 0.2) 35%, transparent 65%)",
-          filter: "blur(18px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.5) 0%, rgba(50, 215, 75, 0.15) 40%, transparent 70%)",
+          filter: "blur(15px)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transform: isCopied ? "translateX(0)" : "translateX(60px)",
-          transition: "opacity 250ms ease, transform 500ms cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "opacity 300ms ease 100ms",
         }}
       />
 
