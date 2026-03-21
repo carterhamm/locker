@@ -73,8 +73,8 @@ function FeatureCard({
             borderRadius: "var(--radius-xl)",
             padding: "1px",
             background: hover
-              ? `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.15) 100%)`
-              : `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.08) 100%)`,
+              ? `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 35%, rgba(255,255,255,0.03) 65%, rgba(255,255,255,0.15) 100%)`
+              : `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.016) 35%, rgba(255,255,255,0.016) 65%, rgba(255,255,255,0.08) 100%)`,
             WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMaskComposite: "xor",
             maskComposite: "exclude",

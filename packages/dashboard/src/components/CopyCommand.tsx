@@ -41,8 +41,9 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         backdropFilter: "blur(40px)",
         WebkitBackdropFilter: "blur(40px)",
         boxShadow: isCopied
-          ? `inset 0 0 30px rgba(50, 215, 75, 0.08),
-             inset -6px 1px 12px rgba(50, 215, 75, 0.1),
+          ? `inset 0 0 30px rgba(50, 215, 75, 0.06),
+             inset -20px 0 40px rgba(50, 215, 75, 0.15),
+             inset -40px 0 60px rgba(50, 215, 75, 0.06),
              0 12px 24px rgba(0, 0, 0, 0.1)`
           : `inset -4px 1px 10px rgba(255, 255, 255, 0.02),
              0 12px 24px rgba(0, 0, 0, 0.1)`,
@@ -71,8 +72,8 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
           borderRadius: "18px",
           padding: "1px",
           background: isCopied
-            ? "linear-gradient(135deg, rgba(50,215,75,0.3) 0%, transparent 40%, transparent 60%, rgba(50,215,75,0.3) 100%)"
-            : "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.1) 100%)",
+            ? "linear-gradient(135deg, rgba(50,215,75,0.3) 0%, rgba(50,215,75,0.06) 40%, rgba(50,215,75,0.06) 60%, rgba(50,215,75,0.3) 100%)"
+            : "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.1) 100%)",
           WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           WebkitMaskComposite: "xor",
           maskComposite: "exclude",
