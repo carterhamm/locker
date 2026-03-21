@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/components/AuthProvider";
 
 interface StoredKey {
@@ -11,9 +10,7 @@ interface StoredKey {
 }
 
 export default function KeysPage() {
-  const { theme } = useTheme();
   const { token } = useAuth();
-  const isTerminal = theme === "terminal";
 
   const [keys, setKeys] = useState<StoredKey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +88,7 @@ export default function KeysPage() {
   if (loading) {
     return (
       <div style={{ color: "var(--text-tertiary)", fontFamily: "var(--font-body)", padding: "40px 0" }}>
-        {isTerminal ? "Loading keys..." : "Loading..."}
+        Loading...
       </div>
     );
   }
@@ -99,63 +96,57 @@ export default function KeysPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isTerminal ? "16px" : "32px" }}>
-        {isTerminal ? (
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px" }}>
-            <span style={{ color: "var(--text-accent)" }}>$</span> locker list
-          </div>
-        ) : (
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-            API Keys
-          </h1>
-        )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, letterSpacing: "-0.02em" }}>
+          API Keys
+        </h1>
 
         <button
           onClick={() => setShowAdd(!showAdd)}
           style={{
-            padding: isTerminal ? "4px 12px" : "8px 20px",
-            borderRadius: isTerminal ? "4px" : "var(--radius-md)",
-            border: isTerminal ? "1px solid var(--border-accent)" : "none",
-            background: isTerminal ? "transparent" : "#ffffff",
-            color: isTerminal ? "var(--text-accent)" : "#000000",
+            padding: "8px 20px",
+            borderRadius: "var(--radius-md)",
+            border: "none",
+            background: "#ffffff",
+            color: "#000000",
             fontFamily: "var(--font-body)",
-            fontSize: isTerminal ? "12px" : "13px",
+            fontSize: "13px",
             fontWeight: 600,
             cursor: "pointer",
-            letterSpacing: isTerminal ? "1px" : "0.02em",
+            letterSpacing: "0.02em",
           }}
         >
-          {isTerminal ? (showAdd ? "CANCEL" : "+ ADD KEY") : showAdd ? "Cancel" : "Add Key"}
+          {showAdd ? "Cancel" : "Add Key"}
         </button>
       </div>
 
       {/* Status messages */}
       {error && (
         <div style={{
-          padding: isTerminal ? "8px 12px" : "10px 16px",
-          borderRadius: isTerminal ? "4px" : "var(--radius-sm)",
-          background: isTerminal ? "transparent" : "rgba(239,68,68,0.1)",
-          border: `1px solid ${isTerminal ? "#ff5f57" : "rgba(239,68,68,0.2)"}`,
-          color: isTerminal ? "#ff5f57" : "var(--error)",
+          padding: "10px 16px",
+          borderRadius: "var(--radius-sm)",
+          background: "rgba(239,68,68,0.1)",
+          border: "1px solid rgba(239,68,68,0.2)",
+          color: "var(--error)",
           fontSize: "13px",
           marginBottom: "16px",
           fontFamily: "var(--font-body)",
         }}>
-          {isTerminal ? `Error: ${error}` : error}
+          {error}
         </div>
       )}
       {success && (
         <div style={{
-          padding: isTerminal ? "8px 12px" : "10px 16px",
-          borderRadius: isTerminal ? "4px" : "var(--radius-sm)",
-          background: isTerminal ? "transparent" : "rgba(34,197,94,0.1)",
-          border: `1px solid ${isTerminal ? "#32d74b" : "rgba(34,197,94,0.2)"}`,
-          color: isTerminal ? "#32d74b" : "var(--success)",
+          padding: "10px 16px",
+          borderRadius: "var(--radius-sm)",
+          background: "rgba(34,197,94,0.1)",
+          border: "1px solid rgba(34,197,94,0.2)",
+          color: "var(--success)",
           fontSize: "13px",
           marginBottom: "16px",
           fontFamily: "var(--font-body)",
         }}>
-          {isTerminal ? `> ${success}` : success}
+          {success}
         </div>
       )}
 
@@ -164,40 +155,40 @@ export default function KeysPage() {
         <form
           onSubmit={handleAdd}
           style={{
-            padding: isTerminal ? "16px" : "24px",
-            borderRadius: isTerminal ? "4px" : "var(--radius-lg)",
-            border: `1px solid ${isTerminal ? "var(--border-accent)" : "var(--border-subtle)"}`,
+            padding: "24px",
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--border-subtle)",
             background: "var(--bg-card)",
             marginBottom: "24px",
           }}
         >
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-end" }}>
             <div style={{ flex: "1 1 200px" }}>
-              <label style={{ display: "block", marginBottom: "4px", color: "var(--text-secondary)", fontSize: isTerminal ? "11px" : "12px", fontFamily: "var(--font-body)", letterSpacing: isTerminal ? "1px" : "0.02em" }}>
-                {isTerminal ? "SERVICE" : "Service name"}
+              <label style={{ display: "block", marginBottom: "4px", color: "var(--text-secondary)", fontSize: "12px", fontFamily: "var(--font-body)", letterSpacing: "0.02em" }}>
+                Service name
               </label>
               <input
                 type="text"
                 value={newService}
                 onChange={(e) => setNewService(e.target.value)}
                 required
-                placeholder={isTerminal ? "openai" : "e.g. openai, resend, stripe"}
+                placeholder="e.g. openai, resend, stripe"
                 style={{
                   width: "100%",
-                  padding: isTerminal ? "6px 10px" : "10px 14px",
-                  borderRadius: isTerminal ? "3px" : "var(--radius-sm)",
+                  padding: "10px 14px",
+                  borderRadius: "var(--radius-sm)",
                   border: "1px solid var(--border-medium)",
                   background: "var(--bg-input)",
                   color: "var(--text-primary)",
                   fontFamily: "var(--font-body)",
-                  fontSize: isTerminal ? "13px" : "14px",
+                  fontSize: "14px",
                   outline: "none",
                 }}
               />
             </div>
             <div style={{ flex: "2 1 300px" }}>
-              <label style={{ display: "block", marginBottom: "4px", color: "var(--text-secondary)", fontSize: isTerminal ? "11px" : "12px", fontFamily: "var(--font-body)", letterSpacing: isTerminal ? "1px" : "0.02em" }}>
-                {isTerminal ? "KEY" : "API Key"}
+              <label style={{ display: "block", marginBottom: "4px", color: "var(--text-secondary)", fontSize: "12px", fontFamily: "var(--font-body)", letterSpacing: "0.02em" }}>
+                API Key
               </label>
               <input
                 type="password"
@@ -207,13 +198,13 @@ export default function KeysPage() {
                 placeholder="sk-..."
                 style={{
                   width: "100%",
-                  padding: isTerminal ? "6px 10px" : "10px 14px",
-                  borderRadius: isTerminal ? "3px" : "var(--radius-sm)",
+                  padding: "10px 14px",
+                  borderRadius: "var(--radius-sm)",
                   border: "1px solid var(--border-medium)",
                   background: "var(--bg-input)",
                   color: "var(--text-primary)",
                   fontFamily: "var(--font-body)",
-                  fontSize: isTerminal ? "13px" : "14px",
+                  fontSize: "14px",
                   outline: "none",
                 }}
               />
@@ -221,20 +212,20 @@ export default function KeysPage() {
             <button
               type="submit"
               style={{
-                padding: isTerminal ? "6px 16px" : "10px 24px",
-                borderRadius: isTerminal ? "3px" : "var(--radius-sm)",
-                border: isTerminal ? "1px solid var(--border-accent)" : "none",
-                background: isTerminal ? "transparent" : "#ffffff",
-                color: isTerminal ? "var(--text-accent)" : "#000000",
+                padding: "10px 24px",
+                borderRadius: "var(--radius-sm)",
+                border: "none",
+                background: "#ffffff",
+                color: "#000000",
                 fontFamily: "var(--font-body)",
-                fontSize: isTerminal ? "12px" : "13px",
+                fontSize: "13px",
                 fontWeight: 600,
                 cursor: "pointer",
-                letterSpacing: isTerminal ? "1px" : "0",
+                letterSpacing: "0",
                 whiteSpace: "nowrap",
               }}
             >
-              {isTerminal ? "STORE" : "Store Key"}
+              Store Key
             </button>
           </div>
         </form>
@@ -243,28 +234,19 @@ export default function KeysPage() {
       {/* Keys List */}
       {keys.length === 0 ? (
         <div style={{
-          padding: isTerminal ? "20px" : "60px",
+          padding: "60px",
           textAlign: "center",
           color: "var(--text-tertiary)",
           fontFamily: "var(--font-body)",
-          fontSize: isTerminal ? "13px" : "14px",
-          border: isTerminal ? "none" : "1px dashed var(--border-subtle)",
-          borderRadius: isTerminal ? "0" : "var(--radius-lg)",
+          fontSize: "14px",
+          border: "1px dashed var(--border-subtle)",
+          borderRadius: "var(--radius-lg)",
         }}>
-          {isTerminal ? (
-            <>
-              <div>No keys stored.</div>
-              <div style={{ color: "var(--text-accent)", marginTop: "4px" }}>$ locker set &lt;service&gt; &lt;key&gt;</div>
-            </>
-          ) : (
-            <>
-              <p style={{ marginBottom: "8px" }}>No API keys stored yet</p>
-              <p style={{ fontSize: "13px" }}>Click &quot;Add Key&quot; to store your first key</p>
-            </>
-          )}
+          <p style={{ marginBottom: "8px" }}>No API keys stored yet</p>
+          <p style={{ fontSize: "13px" }}>Click &quot;Add Key&quot; to store your first key</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: isTerminal ? "2px" : "8px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {keys.map((k, i) => (
             <div
               key={k.service}
@@ -274,9 +256,9 @@ export default function KeysPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: isTerminal ? "8px 12px" : "16px 20px",
-                borderRadius: isTerminal ? "3px" : "var(--radius-md)",
-                border: `1px solid ${isTerminal ? "var(--border-subtle)" : "var(--border-subtle)"}`,
+                padding: "16px 20px",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border-subtle)",
                 background: "var(--bg-card)",
                 transition: `all var(--duration-fast) ease`,
               }}
@@ -284,35 +266,33 @@ export default function KeysPage() {
               <div>
                 <div style={{
                   fontFamily: "var(--font-body)",
-                  fontSize: isTerminal ? "13px" : "15px",
+                  fontSize: "15px",
                   fontWeight: 600,
-                  color: isTerminal ? "var(--text-accent)" : "var(--text-primary)",
-                  marginBottom: isTerminal ? "0" : "2px",
+                  color: "var(--text-primary)",
+                  marginBottom: "2px",
                 }}>
-                  {isTerminal ? `[${k.service}]` : k.service}
+                  {k.service}
                 </div>
-                {!isTerminal && (
-                  <div style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
-                    Added {new Date(k.createdAt).toLocaleDateString()}
-                    {k.lastUsed && ` \u2022 Last used ${new Date(k.lastUsed).toLocaleDateString()}`}
-                  </div>
-                )}
+                <div style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
+                  Added {new Date(k.createdAt).toLocaleDateString()}
+                  {k.lastUsed && ` \u2022 Last used ${new Date(k.lastUsed).toLocaleDateString()}`}
+                </div>
               </div>
               <button
                 onClick={() => handleRevoke(k.service)}
                 style={{
-                  padding: isTerminal ? "2px 8px" : "4px 12px",
-                  borderRadius: isTerminal ? "2px" : "var(--radius-sm)",
-                  border: `1px solid ${isTerminal ? "#ff5f57" : "rgba(239,68,68,0.3)"}`,
+                  padding: "4px 12px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid rgba(239,68,68,0.3)",
                   background: "transparent",
-                  color: isTerminal ? "#ff5f57" : "var(--error)",
+                  color: "var(--error)",
                   fontFamily: "var(--font-body)",
-                  fontSize: isTerminal ? "11px" : "12px",
+                  fontSize: "12px",
                   cursor: "pointer",
-                  letterSpacing: isTerminal ? "1px" : "0",
+                  letterSpacing: "0",
                 }}
               >
-                {isTerminal ? "DEL" : "Revoke"}
+                Revoke
               </button>
             </div>
           ))}

@@ -2,15 +2,16 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useTheme } from "@/components/ThemeProvider";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/components/AuthProvider";
+import { LockerLogo, GitHubIcon } from "@/components/Icons";
 import Link from "next/link";
 
+const PAGE_PADDING = 40;
+
 const navItems = [
-  { href: "/dashboard", label: "Keys", terminalLabel: "KEYS", icon: "K" },
-  { href: "/dashboard/logs", label: "Logs", terminalLabel: "LOGS", icon: "L" },
-  { href: "/dashboard/settings", label: "Settings", terminalLabel: "CONF", icon: "S" },
+  { href: "/dashboard", label: "Keys" },
+  { href: "/dashboard/logs", label: "Logs" },
+  { href: "/dashboard/settings", label: "Settings" },
 ];
 
 export default function DashboardLayout({
@@ -18,15 +19,13 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { theme } = useTheme();
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const isTerminal = theme === "terminal";
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/login");
+      router.push("/auth");
     }
   }, [user, isLoading, router]);
 
@@ -42,7 +41,7 @@ export default function DashboardLayout({
           fontFamily: "var(--font-body)",
         }}
       >
-        {isTerminal ? "Loading..." : "Loading..."}
+        Loading...
       </div>
     );
   }
@@ -55,27 +54,36 @@ export default function DashboardLayout({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: isTerminal ? "8px 20px" : "12px 32px",
+          padding: `12px ${PAGE_PADDING}px`,
           borderBottom: "1px solid var(--border-subtle)",
-          background: isTerminal ? "var(--bg-secondary)" : "var(--bg-secondary)",
+          background: "var(--bg-secondary)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <Link
             href="/"
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: isTerminal ? "13px" : "16px",
-              fontWeight: 700,
-              color: "var(--text-accent)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
               textDecoration: "none",
-              letterSpacing: isTerminal ? "2px" : "-0.02em",
             }}
           >
-            {isTerminal ? "$ locker" : "Locker"}
+            <LockerLogo size={22} />
+            <span
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "16px",
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Locker
+            </span>
           </Link>
 
-          <nav style={{ display: "flex", gap: isTerminal ? "4px" : "4px" }}>
+          <nav style={{ display: "flex", gap: "4px" }}>
             {navItems.map((item) => {
               const isActive =
                 item.href === "/dashboard"
@@ -87,36 +95,31 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   style={{
-                    padding: isTerminal ? "4px 10px" : "6px 14px",
-                    borderRadius: isTerminal ? "3px" : "var(--radius-sm)",
+                    padding: "6px 14px",
+                    borderRadius: "var(--radius-sm)",
                     fontFamily: "var(--font-body)",
-                    fontSize: isTerminal ? "12px" : "13px",
+                    fontSize: "13px",
                     fontWeight: 500,
                     color: isActive ? "var(--text-accent)" : "var(--text-secondary)",
-                    background: isActive
-                      ? isTerminal
-                        ? "rgba(50,215,75,0.1)"
-                        : "var(--bg-card-hover)"
-                      : "transparent",
+                    background: isActive ? "var(--bg-card-hover)" : "transparent",
                     textDecoration: "none",
-                    letterSpacing: isTerminal ? "1px" : "0.01em",
                     transition: `all var(--duration-fast) ease`,
-                    border: isActive && isTerminal ? "1px solid var(--border-accent)" : "1px solid transparent",
+                    border: "1px solid transparent",
                   }}
                 >
-                  {isTerminal ? item.terminalLabel : item.label}
+                  {item.label}
                 </Link>
               );
             })}
           </nav>
         </div>
 
+        {/* Right side — consistent right edge with PAGE_PADDING */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <ThemeToggle />
           <span
             style={{
               color: "var(--text-tertiary)",
-              fontSize: isTerminal ? "11px" : "12px",
+              fontSize: "12px",
               fontFamily: "var(--font-body)",
             }}
           >
@@ -128,18 +131,17 @@ export default function DashboardLayout({
               router.push("/");
             }}
             style={{
-              padding: isTerminal ? "3px 8px" : "4px 12px",
-              borderRadius: isTerminal ? "3px" : "var(--radius-sm)",
+              padding: "4px 12px",
+              borderRadius: "var(--radius-sm)",
               border: "1px solid var(--border-subtle)",
               background: "transparent",
               color: "var(--text-secondary)",
               fontFamily: "var(--font-body)",
-              fontSize: isTerminal ? "11px" : "12px",
+              fontSize: "12px",
               cursor: "pointer",
-              letterSpacing: isTerminal ? "1px" : "0",
             }}
           >
-            {isTerminal ? "EXIT" : "Logout"}
+            Logout
           </button>
         </div>
       </header>
@@ -148,7 +150,7 @@ export default function DashboardLayout({
       <main
         style={{
           flex: 1,
-          padding: isTerminal ? "20px" : "32px",
+          padding: `32px ${PAGE_PADDING}px`,
           maxWidth: "1100px",
           width: "100%",
           margin: "0 auto",

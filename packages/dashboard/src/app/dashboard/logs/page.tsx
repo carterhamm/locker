@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/components/AuthProvider";
 
 interface LogEntry {
@@ -12,9 +11,7 @@ interface LogEntry {
 }
 
 export default function LogsPage() {
-  const { theme } = useTheme();
   const { token } = useAuth();
-  const isTerminal = theme === "terminal";
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,43 +38,22 @@ export default function LogsPage() {
   if (loading) {
     return (
       <div style={{ color: "var(--text-tertiary)", padding: "40px 0", fontFamily: "var(--font-body)" }}>
-        {isTerminal ? "Loading logs..." : "Loading..."}
+        Loading...
       </div>
     );
   }
 
   return (
     <div>
-      {isTerminal ? (
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", marginBottom: "16px" }}>
-          <span style={{ color: "var(--text-accent)" }}>$</span> locker logs --limit 100
-        </div>
-      ) : (
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "32px" }}>
-          Access Logs
-        </h1>
-      )}
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "32px" }}>
+        Access Logs
+      </h1>
 
       {logs.length === 0 ? (
-        <div style={{ padding: isTerminal ? "20px 0" : "60px", textAlign: "center", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontSize: "14px" }}>
-          {isTerminal ? "No access logs yet." : "No access logs yet. Logs appear when keys are retrieved."}
-        </div>
-      ) : isTerminal ? (
-        /* Terminal table */
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", lineHeight: "1.8" }}>
-          <div style={{ color: "var(--text-accent)", borderBottom: "1px solid var(--border-subtle)", paddingBottom: "4px", marginBottom: "4px" }}>
-            {"TIMESTAMP".padEnd(22)}{"SERVICE".padEnd(16)}{"AGENT"}
-          </div>
-          {logs.map((log, i) => (
-            <div key={log.id} className="animate-in" style={{ animationDelay: `${i * 20}ms`, color: "var(--text-secondary)" }}>
-              {new Date(log.accessedAt).toISOString().slice(0, 19).replace("T", " ").padEnd(22)}
-              {log.service.padEnd(16)}
-              {log.agentIdentifier || "-"}
-            </div>
-          ))}
+        <div style={{ padding: "60px", textAlign: "center", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontSize: "14px" }}>
+          No access logs yet. Logs appear when keys are retrieved.
         </div>
       ) : (
-        /* Modern table */
         <div style={{ borderRadius: "var(--radius-lg)", border: "1px solid var(--border-subtle)", overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-body)", fontSize: "13px" }}>
             <thead>
@@ -111,7 +87,7 @@ export default function LogsPage() {
                   </td>
                   <td style={{ padding: "12px 16px", color: "var(--text-secondary)" }}>
                     {log.agentIdentifier || (
-                      <span style={{ color: "var(--text-tertiary)" }}>—</span>
+                      <span style={{ color: "var(--text-tertiary)" }}>&mdash;</span>
                     )}
                   </td>
                 </tr>

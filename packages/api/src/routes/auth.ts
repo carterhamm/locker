@@ -140,6 +140,39 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /auth/check-email
+ * Body: { email }
+ * Returns whether an account exists for this email.
+ * Used by the Continuity auth flow.
+ */
+authRouter.post("/check-email", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== "string") {
+      res.status(400).json({ error: "Email is required" });
+      return;
+    }
+
+    // Demo test account — always respond as existing
+    if (email.toLowerCase() === "a@b.c") {
+      res.json({ exists: true });
+      return;
+    }
+
+    const pool = getPool();
+    const result = await pool.query(
+      "SELECT id FROM users WHERE email = $1",
+      [email.toLowerCase()]
+    );
+
+    res.json({ exists: result.rows.length > 0 });
+  } catch (err) {
+    console.error("Check email error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
  * POST /auth/logout
  * Client-side logout — JWT is stateless, so just acknowledge.
  * Client should discard the token.
