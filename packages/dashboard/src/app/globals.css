@@ -199,6 +199,61 @@ body {
   51%, 100% { opacity: 0; }
 }
 
+@keyframes termLineIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mesh gradient background ── */
+@keyframes meshFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+.mesh-gradient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mesh-gradient .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.04;
+  animation: meshFloat 20s ease-in-out infinite;
+}
+
+.mesh-gradient .orb:nth-child(1) {
+  width: 600px;
+  height: 600px;
+  background: #ffffff;
+  top: -10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.mesh-gradient .orb:nth-child(2) {
+  width: 500px;
+  height: 500px;
+  background: #888888;
+  top: 40%;
+  right: -5%;
+  animation-delay: -7s;
+}
+
+.mesh-gradient .orb:nth-child(3) {
+  width: 400px;
+  height: 400px;
+  background: #ffffff;
+  bottom: -5%;
+  left: -5%;
+  animation-delay: -13s;
+}
+
 .animate-in {
   animation: fadeInUp var(--duration-slow) var(--ease-out-expo) both;
 }

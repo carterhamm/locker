@@ -205,9 +205,6 @@ export default function AuthPage() {
     transition: "border-color 150ms ease",
   };
 
-  // Calculate the card height based on step for smooth expansion
-  const cardMaxHeight = step === "email" ? "220px" : step === "password" ? "360px" : "420px";
-
   return (
     <div
       style={{
@@ -219,6 +216,12 @@ export default function AuthPage() {
         position: "relative",
       }}
     >
+      {/* Background atmosphere */}
+      <div className="mesh-gradient">
+        <div className="orb" />
+        <div className="orb" />
+        <div className="orb" />
+      </div>
       {/* ── Close button (X) top-left ── */}
       <button
         onClick={() => (step === "email" ? router.push("/") : (setStep("email"), setPassword(""), setError("")))}
@@ -317,15 +320,13 @@ export default function AuthPage() {
         <div
           className="animate-in stagger-2"
           style={{
-            padding: "32px",
+            padding: "36px",
             borderRadius: "var(--radius-xl)",
             border: "1px solid var(--border-subtle)",
             background: "var(--bg-card)",
             backdropFilter: "var(--glass-blur)",
             boxShadow: "var(--shadow-card)",
-            transition: `max-height 500ms var(--ease-out-expo), padding 300ms ease`,
-            maxHeight: cardMaxHeight,
-            overflow: "hidden",
+            transition: `all 400ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
           }}
         >
           {/* Title — changes based on step */}
