@@ -18,6 +18,7 @@ import {
   LockerLogo,
 } from "@/components/Icons";
 import Link from "next/link";
+import { FadingBorder } from "@/components/FadingBorder";
 
 const PAGE_PADDING = 40;
 const MAX_WIDTH = 1200;
@@ -210,15 +211,18 @@ export default function LandingPage() {
               gap: "7px",
               padding: "8px 16px",
               borderRadius: "100px",
-              border: "1px solid var(--border-medium)",
+              border: "none",
               color: "var(--text-secondary)",
               fontFamily: "var(--font-body)",
               fontSize: "13px",
               fontWeight: 500,
               textDecoration: "none",
               transition: `all var(--duration-normal) var(--ease-out-expo)`,
+              position: "relative",
+              overflow: "hidden",
             }}
           >
+            <FadingBorder radius="100px" />
             <GitHubIcon size={16} />
             GitHub
           </a>
@@ -336,15 +340,18 @@ export default function LandingPage() {
             style={{
               padding: "14px 36px",
               borderRadius: "100px",
-              border: "1px solid var(--border-medium)",
+              border: "none",
               color: "var(--text-primary)",
               fontFamily: "var(--font-body)",
               fontSize: "15px",
               fontWeight: 500,
               textDecoration: "none",
               transition: `all var(--duration-normal) var(--ease-out-expo)`,
+              position: "relative",
+              overflow: "hidden",
             }}
           >
+            <FadingBorder radius="100px" color="rgba(255,255,255,0.12)" colorFaded="rgba(255,255,255,0.025)" />
             See How It Works
           </a>
         </div>
