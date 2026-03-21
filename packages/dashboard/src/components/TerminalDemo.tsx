@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useReducer, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { LockerLogo } from "./Icons";
 
 interface TerminalLine {
@@ -126,7 +127,7 @@ export function TerminalDemo() {
         onClick={() => setMode("normal")}
         style={{
           position: "fixed",
-          left: "40px",
+          left: "16px",
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 1000,
@@ -215,22 +216,11 @@ export function TerminalDemo() {
 
   const isFS = mode === "fullscreen";
 
-  // ── Main render ──
-  return (
-    <>
-      {/* Fullscreen backdrop */}
-      {isFS && (
-        <div
-          style={{
-            position: "fixed", inset: 0, zIndex: 9998,
-            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
-          }}
-          onClick={() => setMode("normal")}
-        />
-      )}
-
+  // Shared terminal content (used in both normal and fullscreen)
+  function TerminalContent({ fullscreen }: { fullscreen: boolean }) {
+    return (
       <div
-        style={isFS ? {
+        style={fullscreen ? {
           position: "fixed",
           top: "5vh", left: "5vw", right: "5vw", bottom: "5vh",
           zIndex: 9999,
@@ -238,26 +228,23 @@ export function TerminalDemo() {
           overflow: "hidden",
           border: "1px solid rgba(255,255,255,0.1)",
           boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
-          transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
           display: "flex", flexDirection: "column",
         } : {
           borderRadius: "16px",
           overflow: "hidden",
           border: "1px solid rgba(255,255,255,0.06)",
           boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
-          transition: "all 400ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
-        {/* Title bar */}
         <div style={{
           display: "flex", alignItems: "center", padding: "12px 16px",
           background: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.06)", gap: 8,
           flexShrink: 0,
         }}>
           <div style={{ display: "flex", gap: 7 }} onMouseLeave={() => setHoveredDot(null)}>
-            <Dot color="#ff5f57" sym="✕" id="c" fn={() => { setMode("closed"); }} />
-            <Dot color="#febc2e" sym="−" id="m" fn={() => { setMode("minimized"); }} />
-            <Dot color="#28c840" sym="⤢" id="f" fn={() => { setMode(isFS ? "normal" : "fullscreen"); }} />
+            <Dot color="#ff5f57" sym="✕" id="c" fn={() => setMode("closed")} />
+            <Dot color="#febc2e" sym="−" id="m" fn={() => setMode("minimized")} />
+            <Dot color="#28c840" sym="⤢" id="f" fn={() => setMode(fullscreen ? "normal" : "fullscreen")} />
           </div>
           <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
             locker &mdash; zsh
@@ -265,17 +252,16 @@ export function TerminalDemo() {
           <div style={{ width: 52 }} />
         </div>
 
-        {/* Body */}
         <div
-          ref={bodyRef}
+          ref={fullscreen ? undefined : bodyRef}
           style={{
             padding: `${BODY_PAD}px 22px`,
             background: "#0d0d0d",
             fontFamily: "var(--font-mono)",
             fontSize: "13.5px",
-            height: isFS ? "100%" : BODY_H,
-            overflow: isFS ? "auto" : "hidden",
-            flex: isFS ? 1 : undefined,
+            height: fullscreen ? undefined : BODY_H,
+            overflow: fullscreen ? "auto" : "hidden",
+            flex: fullscreen ? 1 : undefined,
           }}
         >
           {completedLines.current.map((line, i) => <Line key={i} line={line} idx={i} />)}
@@ -296,6 +282,22 @@ export function TerminalDemo() {
           )}
         </div>
       </div>
-    </>
-  );
+    );
+  }
+
+  // Fullscreen uses a portal to escape all parent clipping
+  if (isFS) {
+    return createPortal(
+      <>
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+          onClick={() => setMode("normal")}
+        />
+        <TerminalContent fullscreen />
+      </>,
+      document.body
+    );
+  }
+
+  return <TerminalContent fullscreen={false} />;
 }

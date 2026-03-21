@@ -30,7 +30,7 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         width: "100%",
         padding: "18px 22px",
         borderRadius: "16px",
-        border: `1px solid ${isCopied ? "rgba(50, 215, 75, 0.35)" : "var(--border-subtle)"}`,
+        border: `1px solid ${isCopied ? "rgba(50, 215, 75, 0.25)" : "var(--border-subtle)"}`,
         cursor: "pointer",
         textAlign: "left",
         position: "relative",
@@ -39,7 +39,7 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         backdropFilter: "blur(40px)",
         WebkitBackdropFilter: "blur(40px)",
         boxShadow: isCopied
-          ? "inset 0 0 20px rgba(50, 215, 75, 0.12), 0 8px 24px rgba(0,0,0,0.15), 0 0 0 1px rgba(50,215,75,0.12)"
+          ? "inset -8px 1px 16px rgba(50, 215, 75, 0.12), 0 8px 24px rgba(0,0,0,0.15), 0 0 0 1px rgba(50,215,75,0.1)"
           : "0 8px 24px rgba(0,0,0,0.15)",
         transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
@@ -56,61 +56,24 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green fill — edges inward using inset box-shadow + border glow.
-          The glow layer fades out 200ms earlier than the border/text. */}
+      {/* Green glow orb — right side, slides in from off-screen.
+          On fade-out, this disappears 150ms before the border/text. */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          borderRadius: "inherit",
-          boxShadow: isCopied
-            ? "inset 0 0 30px 8px rgba(50, 215, 75, 0.14), inset 0 0 60px 20px rgba(50, 215, 75, 0.06)"
-            : "inset 0 0 0 0 transparent",
-          pointerEvents: "none",
-          /* Glow disappears a split second before the rest:
-             on fade-out, opacity transitions faster (200ms) than the parent's 300ms */
-          opacity: isCopied ? 1 : 0,
-          transition: isCopied
-            ? "box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease"
-            : "box-shadow 200ms ease, opacity 150ms ease",
-        }}
-      />
-
-      {/* Bright accent on right edge */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-15px",
-          right: "-15px",
-          width: "100px",
-          height: "100px",
+          top: "-20px",
+          right: "-10px",
+          width: "160px",
+          height: "140px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.45) 0%, transparent 65%)",
-          filter: "blur(12px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.55) 0%, rgba(50, 215, 75, 0.2) 35%, transparent 65%)",
+          filter: "blur(18px)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
+          transform: isCopied ? "translateX(0)" : "translateX(60px)",
           transition: isCopied
-            ? "opacity 300ms ease 50ms"
-            : "opacity 150ms ease",
-        }}
-      />
-
-      {/* Accent on left edge */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-15px",
-          left: "-15px",
-          width: "80px",
-          height: "80px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.3) 0%, transparent 65%)",
-          filter: "blur(12px)",
-          pointerEvents: "none",
-          opacity: isCopied ? 1 : 0,
-          transition: isCopied
-            ? "opacity 300ms ease 100ms"
-            : "opacity 100ms ease",
+            ? "opacity 250ms ease, transform 500ms cubic-bezier(0.16, 1, 0.3, 1)"
+            : "opacity 100ms ease, transform 300ms ease",
         }}
       />
 
@@ -124,7 +87,7 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             marginBottom: "6px",
-            transition: isCopied ? "color 300ms ease" : "color 200ms ease 100ms",
+            transition: isCopied ? "color 300ms ease" : "color 250ms ease",
           }}
         >
           {isCopied ? "Copied!" : label}
@@ -135,7 +98,6 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         </div>
       </div>
 
-      {/* Copy / check icon */}
       <div
         style={{
           position: "relative",
