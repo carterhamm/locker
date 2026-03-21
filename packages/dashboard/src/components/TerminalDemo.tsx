@@ -74,6 +74,16 @@ export function TerminalDemo() {
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
+  // Esc exits fullscreen
+  useEffect(() => {
+    if (mode !== "fullscreen") return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMode("normal");
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mode]);
+
   function render() { forceRender(); }
 
   function wait(ms: number): Promise<void> {
@@ -120,9 +130,8 @@ export function TerminalDemo() {
   // ── Closed ──
   if (mode === "closed") return null;
 
-  // ── Minimized: circle with Locker logo, left-aligned with nav logo (left: 40px) ──
   if (mode === "minimized") {
-    return (
+    return createPortal(
       <div
         onClick={() => setMode("normal")}
         style={{
@@ -155,7 +164,8 @@ export function TerminalDemo() {
         title="Restore terminal"
       >
         <LockerLogo size={20} />
-      </div>
+      </div>,
+      document.body
     );
   }
 
