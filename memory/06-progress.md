@@ -6,21 +6,22 @@ type: project
 
 # Locker — Build Progress
 
-## Phase 1 — Backend API
-- [ ] Project scaffold + git init
-- [ ] Postgres schema + migrations
-- [ ] Encryption service (AES-256-GCM, envelope model)
-- [ ] Encryption service tests
-- [ ] Auth endpoints (register, login, logout)
-- [ ] JWT middleware
-- [ ] Key endpoints (CRUD)
-- [ ] Logs endpoint
-- [ ] Rate limiting
-- [ ] Health check
-- [ ] .env.example
+## Phase 1 — Backend API (COMPLETE)
+- [x] Project scaffold + git init (monorepo, npm workspaces, .gitignore, docker-compose)
+- [x] Postgres schema + migrations (users, keys, access_logs + migration runner)
+- [x] Encryption service (AES-256-GCM, envelope model, 18 unit tests)
+- [x] Auth endpoints (register with CEK gen, login, logout)
+- [x] JWT middleware (24hr expiry, Bearer token validation)
+- [x] Key endpoints (POST, GET list, GET :service with decrypt + audit log, DELETE)
+- [x] Logs endpoint (GET /logs with pagination)
+- [x] Rate limiting (global 100/15min, auth 20/15min)
+- [x] Health check (GET /health)
+- [x] .env.example with all required vars
+- [x] Route integration tests (9 tests with mock DB)
+- [x] 27 total passing tests
 
 ## Phase 2 — CLI
-Not started.
+Not started. Next up.
 
 ## Phase 3 — Dashboard
 Not started.
@@ -29,4 +30,7 @@ Not started.
 Not started.
 
 ## Blockers
-None yet.
+None.
+
+## Session Log
+- 2026-03-20: Completed full Phase 1 scaffold and implementation. All tests passing.
