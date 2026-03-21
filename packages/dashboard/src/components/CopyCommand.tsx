@@ -35,55 +35,47 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         width: "100%",
         padding: "18px 22px",
         borderRadius: "16px",
-        border: "1px solid rgba(50, 215, 75, 0.12)",
+        border: `1px solid ${isCopied ? "rgba(50, 215, 75, 0.2)" : "var(--border-subtle)"}`,
         cursor: "pointer",
         textAlign: "left",
         position: "relative",
         overflow: "hidden",
-        /* Glass background */
         background: "rgba(20, 20, 20, 0.7)",
         backdropFilter: "blur(40px)",
         WebkitBackdropFilter: "blur(40px)",
-        /* Inner shadow for depth — green tint like the screenshot */
-        boxShadow: `
-          inset -8px 1px 13px rgba(50, 215, 75, 0.08),
-          0 16px 28px rgba(0, 0, 0, 0.15),
-          0 0 0 1px rgba(50, 215, 75, 0.06)
-        `,
-        transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+        boxShadow: isCopied
+          ? "inset -8px 1px 16px rgba(50, 215, 75, 0.1), 0 8px 24px rgba(0,0,0,0.15)"
+          : "0 8px 24px rgba(0,0,0,0.15)",
+        transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "rgba(50, 215, 75, 0.25)";
-        e.currentTarget.style.boxShadow = `
-          inset -8px 1px 16px rgba(50, 215, 75, 0.12),
-          0 16px 28px rgba(0, 0, 0, 0.2),
-          0 0 0 1px rgba(50, 215, 75, 0.1),
-          0 0 40px rgba(50, 215, 75, 0.06)
-        `;
-        e.currentTarget.style.transform = "translateY(-1px)";
+        if (!isCopied) {
+          e.currentTarget.style.borderColor = "var(--border-medium)";
+          e.currentTarget.style.transform = "translateY(-1px)";
+        }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "rgba(50, 215, 75, 0.12)";
-        e.currentTarget.style.boxShadow = `
-          inset -8px 1px 13px rgba(50, 215, 75, 0.08),
-          0 16px 28px rgba(0, 0, 0, 0.15),
-          0 0 0 1px rgba(50, 215, 75, 0.06)
-        `;
-        e.currentTarget.style.transform = "translateY(0)";
+        if (!isCopied) {
+          e.currentTarget.style.borderColor = "var(--border-subtle)";
+          e.currentTarget.style.transform = "translateY(0)";
+        }
       }}
     >
-      {/* Green glow orb — top right, like the orange blob in the screenshot */}
+      {/* Green glow — only appears on copy, sweeps right-to-left */}
       <div
         style={{
           position: "absolute",
-          top: "-30px",
-          right: "-20px",
-          width: "120px",
-          height: "120px",
+          top: "-40px",
+          right: isCopied ? "auto" : "-150px",
+          left: isCopied ? "-40px" : "auto",
+          width: "180px",
+          height: "180px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.2) 0%, transparent 70%)",
-          filter: "blur(20px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.35) 0%, rgba(50, 215, 75, 0.08) 40%, transparent 70%)",
+          filter: "blur(25px)",
           pointerEvents: "none",
+          opacity: isCopied ? 1 : 0,
+          transition: "left 600ms cubic-bezier(0.16, 1, 0.3, 1), right 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease",
         }}
       />
 
@@ -108,7 +100,7 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
             color: "var(--text-primary)",
           }}
         >
-          <span style={{ color: "rgba(50, 215, 75, 0.5)", marginRight: "6px" }}>$</span>
+          <span style={{ color: "var(--text-tertiary)", marginRight: "6px" }}>$</span>
           {command}
         </div>
       </div>
