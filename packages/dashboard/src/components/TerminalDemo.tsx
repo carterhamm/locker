@@ -141,18 +141,18 @@ export function TerminalDemo() {
 
   if (mode === "closed") return null;
 
-  // ── Stoplight dot — large tap area via padding ──
+  // ── Stoplight dot — 28x28 tap target ──
   function Dot({ color, sym, id, fn }: { color: string; sym: string; id: string; fn: () => void }) {
     return (
       <div
-        onClick={(e) => { e.stopPropagation(); fn(); }}
+        onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); fn(); }}
         onMouseEnter={() => setHoveredDot(id)}
         onMouseLeave={() => setHoveredDot(null)}
         style={{
-          padding: "6px",
-          margin: "-6px",
+          width: 28, height: 28,
           cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
+          borderRadius: "50%",
         }}
       >
         <div style={{
@@ -229,7 +229,7 @@ export function TerminalDemo() {
       background: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.06)", gap: 8,
       flexShrink: 0,
     }}>
-      <div style={{ display: "flex", gap: 7 }} onMouseLeave={() => setHoveredDot(null)}>
+      <div style={{ display: "flex", gap: 0, margin: "-8px", marginRight: 0 }} onMouseLeave={() => setHoveredDot(null)}>
         <Dot color="#ff5f57" sym="✕" id="c" fn={() => setMode("closed")} />
         <Dot color="#febc2e" sym="−" id="m" fn={() => setMode("minimized")} />
         <Dot color="#28c840" sym="⤢" id="f" fn={() => setMode(isFS ? "normal" : "fullscreen")} />
@@ -241,45 +241,50 @@ export function TerminalDemo() {
     </div>
   );
 
-  // ── Minimized pill — portaled, with genie animation ──
+  // ── Minimized pill — portaled, genie from terminal position to pill ──
   if (mode === "minimized" && mounted) {
+    // Get the terminal's last known position for the animation start
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    const startX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const startY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+    // Target position
+    const endX = 30; // left: 8px + half of 44px
+    const endY = window.innerHeight * 0.65;
+
     return (
       <>
-        {/* Invisible wrapper to keep the IntersectionObserver ref alive */}
         <div ref={wrapperRef} style={{ height: 0, overflow: "hidden" }}>
           <div ref={bodyRef} />
         </div>
         {createPortal(
           <motion.div
             initial={{
-              borderRadius: "16px",
-              width: 200,
-              height: 120,
-              opacity: 0,
-              x: 0,
-              y: 0,
+              width: rect?.width || 400,
+              height: rect?.height || 300,
+              borderRadius: 16,
+              x: startX - (rect?.width || 400) / 2,
+              y: startY - (rect?.height || 300) / 2,
+              opacity: 1,
             }}
             animate={{
-              borderRadius: "50%",
               width: 44,
               height: 44,
+              borderRadius: 22,
+              x: endX - 22,
+              y: endY - 22,
               opacity: 1,
-              x: 0,
-              y: 0,
             }}
             transition={{
               type: "spring",
-              damping: 22,
-              stiffness: 200,
-              mass: 1,
-              opacity: { duration: 0.3, ease: "easeOut" },
+              damping: 26,
+              stiffness: 180,
+              mass: 0.9,
             }}
             onClick={handleRestore}
             style={{
               position: "fixed",
-              left: "8px",
-              top: "60%",
-              translateY: "-50%",
+              top: 0,
+              left: 0,
               zIndex: 1000,
               background: "rgba(30,30,30,0.95)",
               border: "1px solid rgba(255,255,255,0.12)",
@@ -291,13 +296,13 @@ export function TerminalDemo() {
               justifyContent: "center",
               overflow: "hidden",
             }}
-            whileHover={{ scale: 1.1, borderColor: "rgba(255,255,255,0.25)" }}
+            whileHover={{ scale: 1.1 }}
             title="Restore terminal"
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.35, type: "spring", damping: 20, stiffness: 300 }}
             >
               <LockerLogo size={20} />
             </motion.div>
@@ -308,7 +313,7 @@ export function TerminalDemo() {
     );
   }
 
-  // ── Fullscreen — portaled with motion expand ──
+  // ── Fullscreen — portaled with scale animation ──
   if (isFS && mounted) {
     return (
       <>
@@ -320,28 +325,29 @@ export function TerminalDemo() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.2 }}
               style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
               onClick={() => setMode("normal")}
             />
             <motion.div
-              initial={{ top: "20%", left: "15%", right: "15%", bottom: "20%", borderRadius: "16px", opacity: 0.8 }}
-              animate={{ top: "3vh", left: "3vw", right: "3vw", bottom: "3vh", borderRadius: "12px", opacity: 1 }}
-              exit={{ top: "20%", left: "15%", right: "15%", bottom: "20%", borderRadius: "16px", opacity: 0 }}
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{
                 type: "spring",
-                damping: 30,
-                stiffness: 250,
+                damping: 28,
+                stiffness: 300,
                 mass: 0.8,
-                opacity: { duration: 0.2 },
               }}
               style={{
-                position: "fixed", zIndex: 9999,
+                position: "fixed",
+                top: "3vh", left: "3vw", right: "3vw", bottom: "3vh",
+                zIndex: 9999,
+                borderRadius: "12px",
                 overflow: "hidden",
                 border: "1px solid rgba(255,255,255,0.1)",
                 boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
                 display: "flex", flexDirection: "column",
+                transformOrigin: "center center",
               }}
             >
               {titleBar}

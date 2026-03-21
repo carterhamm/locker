@@ -61,21 +61,23 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green glow — only appears on copy, sweeps right-to-left */}
+      {/* Green glow — appears on right side when copied */}
       <div
         style={{
           position: "absolute",
-          top: "-40px",
-          right: isCopied ? "auto" : "-150px",
-          left: isCopied ? "-40px" : "auto",
+          top: "-30px",
+          right: "-20px",
           width: "180px",
           height: "180px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.35) 0%, rgba(50, 215, 75, 0.08) 40%, transparent 70%)",
-          filter: "blur(25px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.4) 0%, rgba(50, 215, 75, 0.1) 40%, transparent 70%)",
+          filter: "blur(20px)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transition: "left 600ms cubic-bezier(0.16, 1, 0.3, 1), right 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease",
+          transform: isCopied ? "scale(1)" : "scale(0.5)",
+          transition: isCopied
+            ? "opacity 200ms ease, transform 400ms cubic-bezier(0.16, 1, 0.3, 1)"
+            : "opacity 100ms ease, transform 200ms ease",
         }}
       />
 
