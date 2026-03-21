@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useReducer } from "react";
 
 interface TerminalLine {
   text: string;
@@ -8,7 +8,7 @@ interface TerminalLine {
   delay: number;
 }
 
-const DEMO_LINES: TerminalLine[] = [
+const LINES: TerminalLine[] = [
   { text: "# Install the CLI", type: "comment", delay: 500 },
   { text: "$ npm install -g locker-cli", type: "command", delay: 200 },
   { text: "added 42 packages in 2.1s", type: "output", delay: 1200 },
@@ -26,92 +26,102 @@ const DEMO_LINES: TerminalLine[] = [
   { text: "re_aBcDeFgHiJkLmNoPqRsT...", type: "success", delay: 600 },
 ];
 
-export function TerminalDemo() {
-  const [visibleLines, setVisibleLines] = useState<number>(0);
-  const [typingIndex, setTypingIndex] = useState<number>(0);
-  const [currentTyped, setCurrentTyped] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [done, setDone] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+const COLORS: Record<string, string> = {
+  command: "#e2e2e2",
+  output: "rgba(255,255,255,0.4)",
+  comment: "rgba(255,255,255,0.25)",
+  success: "#32d74b",
+};
 
-  // Clean up any pending timer on unmount
+/**
+ * Imperative animation driven by refs — immune to strict mode double-fire.
+ * React state is only used to trigger re-renders for display.
+ */
+export function TerminalDemo() {
+  const [, forceRender] = useReducer((x: number) => x + 1, 0);
+
+  // All animation state in refs so strict mode can't reset it
+  const completedLines = useRef<TerminalLine[]>([]);
+  const typingText = useRef("");
+  const isDone = useRef(false);
+  const isRunning = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Start when scrolled into view
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isRunning.current && !isDone.current) {
+          isRunning.current = true;
+          observer.disconnect();
+          runAnimation();
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  function render() {
+    forceRender();
+    // Auto-scroll
+    requestAnimationFrame(() => {
+      const el = containerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
+  }
+
+  async function runAnimation() {
+    for (let i = 0; i < LINES.length; i++) {
+      const line = LINES[i];
+
+      if (line.type === "command") {
+        // Type character by character
+        typingText.current = "";
+        render();
+        for (let c = 0; c < line.text.length; c++) {
+          await wait(45 + Math.random() * 40);
+          typingText.current = line.text.slice(0, c + 1);
+          render();
+        }
+        await wait(250);
+        typingText.current = "";
+        completedLines.current = [...completedLines.current, line];
+        render();
+      } else {
+        // Output/comment/success — appear after delay
+        await wait(line.delay);
+        completedLines.current = [...completedLines.current, line];
+        render();
+      }
+    }
+
+    // Done — freeze forever
+    isDone.current = true;
+    typingText.current = "";
+    render();
+  }
+
+  function wait(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      timerRef.current = setTimeout(resolve, ms);
+    });
+  }
+
+  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, []);
 
-  // Start when visible (once)
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || started) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setStarted(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [started]);
-
-  // Main animation driver
-  useEffect(() => {
-    if (!started || done) return;
-    if (visibleLines >= DEMO_LINES.length) {
-      setDone(true);
-      return;
-    }
-
-    const line = DEMO_LINES[visibleLines];
-
-    if (line.type === "command" && !isTyping) {
-      setIsTyping(true);
-      setCurrentTyped("");
-      setTypingIndex(0);
-      return;
-    }
-
-    if (isTyping) {
-      const text = DEMO_LINES[visibleLines].text;
-      if (typingIndex < text.length) {
-        timerRef.current = setTimeout(() => {
-          setCurrentTyped(text.slice(0, typingIndex + 1));
-          setTypingIndex(typingIndex + 1);
-        }, 45 + Math.random() * 40);
-        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-      } else {
-        setIsTyping(false);
-        timerRef.current = setTimeout(() => {
-          setVisibleLines((v) => v + 1);
-        }, 250);
-        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-      }
-    }
-
-    timerRef.current = setTimeout(() => {
-      setVisibleLines((v) => v + 1);
-    }, line.delay);
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [started, done, visibleLines, isTyping, typingIndex]);
-
-  // Auto-scroll
-  useEffect(() => {
-    const el = containerRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [visibleLines, currentTyped]);
-
-  const colorMap: Record<string, string> = {
-    command: "#e2e2e2",
-    output: "rgba(255,255,255,0.4)",
-    comment: "rgba(255,255,255,0.25)",
-    success: "#32d74b",
-  };
+  const isCurrentlyTyping = typingText.current.length > 0 && !isDone.current;
 
   return (
     <div
@@ -119,7 +129,8 @@ export function TerminalDemo() {
         borderRadius: "16px",
         overflow: "hidden",
         border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
+        boxShadow:
+          "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
       }}
     >
       {/* Title bar */}
@@ -134,9 +145,9 @@ export function TerminalDemo() {
         }}
       >
         <div style={{ display: "flex", gap: "7px" }}>
-          <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ff5f57" }} />
-          <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#febc2e" }} />
-          <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#28c840" }} />
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#ff5f57" }} />
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#febc2e" }} />
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#28c840" }} />
         </div>
         <span
           style={{
@@ -145,15 +156,14 @@ export function TerminalDemo() {
             fontSize: "12px",
             color: "rgba(255,255,255,0.35)",
             fontFamily: "var(--font-mono)",
-            letterSpacing: "0.03em",
           }}
         >
           locker &mdash; zsh
         </span>
-        <div style={{ width: "52px" }} />
+        <div style={{ width: 52 }} />
       </div>
 
-      {/* Terminal body */}
+      {/* Body */}
       <div
         ref={containerRef}
         style={{
@@ -167,45 +177,45 @@ export function TerminalDemo() {
           overflow: "auto",
         }}
       >
-        {DEMO_LINES.slice(0, visibleLines).map((line, i) => (
+        {completedLines.current.map((line, i) => (
           <div
             key={i}
             style={{
-              color: colorMap[line.type],
-              opacity: 0,
-              animation: "termLineIn 0.3s ease forwards",
+              color: COLORS[line.type],
               minHeight: line.text === "" ? "12px" : undefined,
             }}
           >
             {line.text}
           </div>
         ))}
-        {/* Currently typing line */}
-        {isTyping && !done && (
-          <div style={{ color: colorMap["command"] }}>
-            {currentTyped}
+
+        {/* Typing cursor */}
+        {isCurrentlyTyping && (
+          <div style={{ color: COLORS.command }}>
+            {typingText.current}
             <span
               style={{
                 display: "inline-block",
-                width: "8px",
-                height: "16px",
+                width: 8,
+                height: 16,
                 background: "rgba(255,255,255,0.7)",
-                marginLeft: "1px",
+                marginLeft: 1,
                 verticalAlign: "text-bottom",
                 animation: "blink 1s step-end infinite",
               }}
             />
           </div>
         )}
-        {/* Frozen idle cursor — stays forever once done */}
-        {done && (
-          <div style={{ color: "rgba(255,255,255,0.4)", marginTop: "4px" }}>
+
+        {/* Frozen idle prompt */}
+        {isDone.current && (
+          <div style={{ color: "rgba(255,255,255,0.4)", marginTop: 4 }}>
             ${" "}
             <span
               style={{
                 display: "inline-block",
-                width: "8px",
-                height: "16px",
+                width: 8,
+                height: 16,
                 background: "rgba(255,255,255,0.7)",
                 verticalAlign: "text-bottom",
                 animation: "blink 1s step-end infinite",

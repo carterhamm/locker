@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback, useRef } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { TerminalDemo } from "@/components/TerminalDemo";
@@ -120,6 +121,14 @@ function FeatureCard({
 /* ─── Main Landing Page ─── */
 export default function LandingPage() {
   const { user } = useAuth();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleCopy = useCallback((id: string) => {
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    setCopiedId(id);
+    copyTimerRef.current = setTimeout(() => setCopiedId(null), 2000);
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", position: "relative" }}>
@@ -336,13 +345,13 @@ export default function LandingPage() {
         {/* Tap-to-copy commands */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "24px" }}>
           <ScrollReveal delay={100}>
-            <CopyCommand command="npm install -g locker-cli" label="Install" />
+            <CopyCommand command="npm install -g locker-cli" label="Install" id="install" copiedId={copiedId} onCopy={handleCopy} />
           </ScrollReveal>
           <ScrollReveal delay={180}>
-            <CopyCommand command="locker login" label="Authenticate" />
+            <CopyCommand command="locker login" label="Authenticate" id="login" copiedId={copiedId} onCopy={handleCopy} />
           </ScrollReveal>
           <ScrollReveal delay={260}>
-            <CopyCommand command="locker get openai" label="Retrieve a key" />
+            <CopyCommand command="locker get openai" label="Retrieve a key" id="get" copiedId={copiedId} onCopy={handleCopy} />
           </ScrollReveal>
         </div>
       </section>
