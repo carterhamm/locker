@@ -12,9 +12,14 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
   const isCopied = copiedId === id;
 
   async function handleCopy() {
-    try { await navigator.clipboard.writeText(command); } catch {
-      const el = document.createElement("textarea"); el.value = command;
-      document.body.appendChild(el); el.select(); document.execCommand("copy");
+    try {
+      await navigator.clipboard.writeText(command);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = command;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
       document.body.removeChild(el);
     }
     onCopy(id);
@@ -30,7 +35,7 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         width: "100%",
         padding: "18px 22px",
         borderRadius: "16px",
-        border: `1px solid ${isCopied ? "rgba(50, 215, 75, 0.25)" : "var(--border-subtle)"}`,
+        border: `1px solid ${isCopied ? "rgba(50, 215, 75, 0.2)" : "var(--border-subtle)"}`,
         cursor: "pointer",
         textAlign: "left",
         position: "relative",
@@ -39,7 +44,7 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         backdropFilter: "blur(40px)",
         WebkitBackdropFilter: "blur(40px)",
         boxShadow: isCopied
-          ? "inset -8px 1px 16px rgba(50, 215, 75, 0.12), 0 8px 24px rgba(0,0,0,0.15), 0 0 0 1px rgba(50,215,75,0.1)"
+          ? "inset -8px 1px 16px rgba(50, 215, 75, 0.1), 0 8px 24px rgba(0,0,0,0.15)"
           : "0 8px 24px rgba(0,0,0,0.15)",
         transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
@@ -56,24 +61,21 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
         }
       }}
     >
-      {/* Green glow orb — right side, slides in from off-screen.
-          On fade-out, this disappears 150ms before the border/text. */}
+      {/* Green glow — only appears on copy, sweeps right-to-left */}
       <div
         style={{
           position: "absolute",
-          top: "-20px",
-          right: "-10px",
-          width: "160px",
-          height: "140px",
+          top: "-40px",
+          right: isCopied ? "auto" : "-150px",
+          left: isCopied ? "-40px" : "auto",
+          width: "180px",
+          height: "180px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(50, 215, 75, 0.55) 0%, rgba(50, 215, 75, 0.2) 35%, transparent 65%)",
-          filter: "blur(18px)",
+          background: "radial-gradient(circle, rgba(50, 215, 75, 0.35) 0%, rgba(50, 215, 75, 0.08) 40%, transparent 70%)",
+          filter: "blur(25px)",
           pointerEvents: "none",
           opacity: isCopied ? 1 : 0,
-          transform: isCopied ? "translateX(0)" : "translateX(60px)",
-          transition: isCopied
-            ? "opacity 250ms ease, transform 500ms cubic-bezier(0.16, 1, 0.3, 1)"
-            : "opacity 100ms ease, transform 300ms ease",
+          transition: "left 600ms cubic-bezier(0.16, 1, 0.3, 1), right 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease",
         }}
       />
 
@@ -83,21 +85,27 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
             fontSize: "11px",
             fontFamily: "var(--font-body)",
             fontWeight: 500,
-            color: isCopied ? "rgba(50, 215, 75, 0.7)" : "rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.35)",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             marginBottom: "6px",
-            transition: isCopied ? "color 300ms ease" : "color 250ms ease",
           }}
         >
-          {isCopied ? "Copied!" : label}
+          {label}
         </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--text-primary)" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "14px",
+            color: "var(--text-primary)",
+          }}
+        >
           <span style={{ color: "var(--text-tertiary)", marginRight: "6px" }}>$</span>
           {command}
         </div>
       </div>
 
+      {/* Copy / check icon */}
       <div
         style={{
           position: "relative",
@@ -110,8 +118,8 @@ export function CopyCommand({ command, label, id, copiedId, onCopy }: CopyComman
           alignItems: "center",
           justifyContent: "center",
           borderRadius: "8px",
-          background: isCopied ? "rgba(50,215,75,0.2)" : "rgba(255,255,255,0.04)",
-          border: `1px solid ${isCopied ? "rgba(50,215,75,0.4)" : "rgba(255,255,255,0.06)"}`,
+          background: isCopied ? "rgba(50,215,75,0.15)" : "rgba(255,255,255,0.04)",
+          border: `1px solid ${isCopied ? "rgba(50,215,75,0.3)" : "rgba(255,255,255,0.06)"}`,
           transition: "all 200ms ease",
         }}
       >

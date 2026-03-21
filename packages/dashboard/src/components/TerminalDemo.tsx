@@ -127,7 +127,7 @@ export function TerminalDemo() {
         onClick={() => setMode("normal")}
         style={{
           position: "fixed",
-          left: "16px",
+          left: "8px",
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 1000,
@@ -216,76 +216,45 @@ export function TerminalDemo() {
 
   const isFS = mode === "fullscreen";
 
-  // Shared terminal content (used in both normal and fullscreen)
-  function TerminalContent({ fullscreen }: { fullscreen: boolean }) {
-    return (
-      <div
-        style={fullscreen ? {
-          position: "fixed",
-          top: "5vh", left: "5vw", right: "5vw", bottom: "5vh",
-          zIndex: 9999,
-          borderRadius: "16px",
-          overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
-          display: "flex", flexDirection: "column",
-        } : {
-          borderRadius: "16px",
-          overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
-        }}
-      >
-        <div style={{
-          display: "flex", alignItems: "center", padding: "12px 16px",
-          background: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.06)", gap: 8,
-          flexShrink: 0,
-        }}>
-          <div style={{ display: "flex", gap: 7 }} onMouseLeave={() => setHoveredDot(null)}>
-            <Dot color="#ff5f57" sym="✕" id="c" fn={() => setMode("closed")} />
-            <Dot color="#febc2e" sym="−" id="m" fn={() => setMode("minimized")} />
-            <Dot color="#28c840" sym="⤢" id="f" fn={() => setMode(fullscreen ? "normal" : "fullscreen")} />
-          </div>
-          <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
-            locker &mdash; zsh
-          </span>
-          <div style={{ width: 52 }} />
+  // Shared terminal body JSX
+  const terminalBody = (
+    <>
+      {completedLines.current.map((line, i) => <Line key={i} line={line} idx={i} />)}
+      {typing && (
+        <div style={{ color: COLORS.command, height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
+          <span style={{ userSelect: "none", color: "rgba(255,255,255,0.3)" }}>${"\u00A0"}</span>
+          {typingText.current.slice(2)}
+          <span style={{ display: "inline-block", width: 7, height: 15, background: "rgba(255,255,255,0.7)", marginLeft: 1, animation: "blink 1s step-end infinite" }} />
         </div>
-
-        <div
-          ref={fullscreen ? undefined : bodyRef}
-          style={{
-            padding: `${BODY_PAD}px 22px`,
-            background: "#0d0d0d",
-            fontFamily: "var(--font-mono)",
-            fontSize: "13.5px",
-            height: fullscreen ? undefined : BODY_H,
-            overflow: fullscreen ? "auto" : "hidden",
-            flex: fullscreen ? 1 : undefined,
-          }}
-        >
-          {completedLines.current.map((line, i) => <Line key={i} line={line} idx={i} />)}
-
-          {typing && (
-            <div style={{ color: COLORS.command, height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
-              <span style={{ userSelect: "none", color: "rgba(255,255,255,0.3)" }}>${"\u00A0"}</span>
-              {typingText.current.slice(2)}
-              <span style={{ display: "inline-block", width: 7, height: 15, background: "rgba(255,255,255,0.7)", marginLeft: 1, animation: "blink 1s step-end infinite" }} />
-            </div>
-          )}
-
-          {isDone.current && (
-            <div style={{ color: "rgba(255,255,255,0.4)", height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
-              <span style={{ userSelect: "none" }}>$&nbsp;</span>
-              <span style={{ display: "inline-block", width: 7, height: 15, background: "rgba(255,255,255,0.7)", animation: "blink 1s step-end infinite" }} />
-            </div>
-          )}
+      )}
+      {isDone.current && (
+        <div style={{ color: "rgba(255,255,255,0.4)", height: LH, lineHeight: `${LH}px`, display: "flex", alignItems: "center" }}>
+          <span style={{ userSelect: "none" }}>$&nbsp;</span>
+          <span style={{ display: "inline-block", width: 7, height: 15, background: "rgba(255,255,255,0.7)", animation: "blink 1s step-end infinite" }} />
         </div>
+      )}
+    </>
+  );
+
+  const titleBar = (
+    <div style={{
+      display: "flex", alignItems: "center", padding: "12px 16px",
+      background: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.06)", gap: 8,
+      flexShrink: 0,
+    }}>
+      <div style={{ display: "flex", gap: 7 }} onMouseLeave={() => setHoveredDot(null)}>
+        <Dot color="#ff5f57" sym="✕" id="c" fn={() => setMode("closed")} />
+        <Dot color="#febc2e" sym="−" id="m" fn={() => setMode("minimized")} />
+        <Dot color="#28c840" sym="⤢" id="f" fn={() => setMode(isFS ? "normal" : "fullscreen")} />
       </div>
-    );
-  }
+      <span style={{ flex: 1, textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
+        locker &mdash; zsh
+      </span>
+      <div style={{ width: 52 }} />
+    </div>
+  );
 
-  // Fullscreen uses a portal to escape all parent clipping
+  // Fullscreen — portal to document.body
   if (isFS) {
     return createPortal(
       <>
@@ -293,11 +262,42 @@ export function TerminalDemo() {
           style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
           onClick={() => setMode("normal")}
         />
-        <TerminalContent fullscreen />
+        <div style={{
+          position: "fixed", top: "5vh", left: "5vw", right: "5vw", bottom: "5vh",
+          zIndex: 9999, borderRadius: "16px", overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 32px 100px rgba(0,0,0,0.7)",
+          display: "flex", flexDirection: "column",
+        }}>
+          {titleBar}
+          <div style={{
+            padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
+            fontFamily: "var(--font-mono)", fontSize: "13.5px",
+            flex: 1, overflow: "auto",
+          }}>
+            {terminalBody}
+          </div>
+        </div>
       </>,
       document.body
     );
   }
 
-  return <TerminalContent fullscreen={false} />;
+  // Normal inline
+  return (
+    <div style={{
+      borderRadius: "16px", overflow: "hidden",
+      border: "1px solid rgba(255,255,255,0.06)",
+      boxShadow: "0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)",
+    }}>
+      {titleBar}
+      <div ref={bodyRef} style={{
+        padding: `${BODY_PAD}px 22px`, background: "#0d0d0d",
+        fontFamily: "var(--font-mono)", fontSize: "13.5px",
+        height: BODY_H, overflow: "hidden",
+      }}>
+        {terminalBody}
+      </div>
+    </div>
+  );
 }
