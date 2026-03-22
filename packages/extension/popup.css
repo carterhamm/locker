@@ -1,0 +1,223 @@
+/* Match the Locker website design language */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 320px;
+  min-height: 200px;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fading border on the popup itself */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 35%, rgba(255,255,255,0.02) 65%, rgba(255,255,255,0.1) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Ambient glow */
+body::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 200ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.logo-text {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  text-align: center;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+/* Header (main view) */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.logo-small {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.logo-text-small {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: #ffffff;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: box-shadow 150ms ease;
+  position: relative;
+}
+
+.field input::placeholder {
+  color: rgba(255,255,255,0.2);
+}
+
+.field input:focus {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+}
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  margin-top: 4px;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 150ms ease;
+}
+
+.btn-ghost:hover {
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.04);
+}
+
+/* Messages */
+.error {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+  font-size: 12px;
+  animation: fadeIn 150ms ease;
+}
+
+.success {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(50,215,75,0.08);
+  color: #32d74b;
+  font-size: 12px;
+  animation: fadeIn 150ms ease;
+}
+
+/* User info */
+.user-info {
+  text-align: center;
+  color: rgba(255,255,255,0.2);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* Form */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
