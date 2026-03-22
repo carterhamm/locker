@@ -186,7 +186,6 @@ export default function LandingPage() {
             textDecoration: "none",
           }}
         >
-          <LockerLogo size={26} />
           <span
             style={{
               fontFamily: "var(--font-display)",
@@ -258,7 +257,11 @@ export default function LandingPage() {
           position: "relative",
         }}
       >
-        <div className="animate-in stagger-1">
+        <div className="animate-in stagger-1" style={{ marginBottom: "28px" }}>
+          <LockerLogo size={80} />
+        </div>
+
+        <div className="animate-in stagger-2">
           <p
             style={{
               fontFamily: "var(--font-body)",

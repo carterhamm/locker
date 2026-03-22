@@ -170,75 +170,73 @@ export default function KeysPage() {
         />
       </div>
 
-      {/* Header */}
+      {/* Header with inline pill alerts */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 600, letterSpacing: "-0.01em" }}>
           Your Keys
         </h2>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          style={{
-            padding: "8px 20px",
-            borderRadius: "100px",
-            border: "none",
-            background: "#ffffff",
-            color: "#000000",
-            fontFamily: "var(--font-body)",
-            fontSize: "13px",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "all 200ms ease",
-          }}
-        >
-          {showAdd ? "Cancel" : "+ Add Key"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <AnimatePresence>
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, x: 10 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.9, x: 10 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "100px",
+                  background: "rgba(50,215,75,0.1)",
+                  color: "var(--success)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-body)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {success}
+              </motion.div>
+            )}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, x: 10 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.9, x: 10 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "100px",
+                  background: "rgba(239,68,68,0.1)",
+                  color: "var(--error)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-body)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button
+            onClick={() => setShowAdd(!showAdd)}
+            style={{
+              padding: "8px 20px",
+              borderRadius: "100px",
+              border: "none",
+              background: "#ffffff",
+              color: "#000000",
+              fontFamily: "var(--font-body)",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 200ms ease",
+            }}
+          >
+            {showAdd ? "Cancel" : "+ Add Key"}
+          </button>
+        </div>
       </div>
-
-      {/* Status messages */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            style={{
-              padding: "12px 18px",
-              borderRadius: "var(--radius-md)",
-              background: "rgba(239,68,68,0.08)",
-              color: "var(--error)",
-              fontSize: "13px",
-              marginBottom: "16px",
-              fontFamily: "var(--font-body)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <FadingBorder radius="var(--radius-md)" color="rgba(239,68,68,0.2)" colorFaded="rgba(239,68,68,0.04)" />
-            {error}
-          </motion.div>
-        )}
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            style={{
-              padding: "12px 18px",
-              borderRadius: "var(--radius-md)",
-              background: "rgba(34,197,94,0.08)",
-              color: "var(--success)",
-              fontSize: "13px",
-              marginBottom: "16px",
-              fontFamily: "var(--font-body)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <FadingBorder radius="var(--radius-md)" color="rgba(34,197,94,0.2)" colorFaded="rgba(34,197,94,0.04)" />
-            {success}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Add Key Form */}
       <AnimatePresence>

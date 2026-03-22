@@ -295,23 +295,23 @@ export default function AuthPage() {
 
       {/* ── Auth Card ── */}
       <div style={{ width: "100%", maxWidth: "400px" }}>
-        {/* Logo */}
+        {/* Large logo above card */}
         <div
           className="animate-in stagger-1"
           style={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "10px",
-            marginBottom: "40px",
+            marginBottom: "32px",
           }}
         >
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-            <LockerLogo size={28} />
+          <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", textDecoration: "none", gap: "12px" }}>
+            <LockerLogo size={72} />
             <span
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "20px",
+                fontSize: "22px",
                 fontWeight: 700,
                 letterSpacing: "-0.02em",
                 color: "var(--text-primary)",

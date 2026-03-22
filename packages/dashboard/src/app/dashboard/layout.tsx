@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { LockerLogo } from "@/components/Icons";
 import { FadingBorder } from "@/components/FadingBorder";
 import Link from "next/link";
 
@@ -29,6 +28,25 @@ export default function DashboardLayout({
       router.push("/auth");
     }
   }, [user, isLoading, router]);
+
+  // Tab key cycles through dashboard pages
+  const paths = navItems.map((n) => n.href);
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      // Don't intercept Tab if user is typing in an input
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      e.preventDefault();
+      const currentIdx = paths.indexOf(pathname);
+      const nextIdx = e.shiftKey
+        ? (currentIdx - 1 + paths.length) % paths.length
+        : (currentIdx + 1) % paths.length;
+      router.push(paths[nextIdx]);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [pathname, router]);
 
   if (isLoading || !user) {
     return (
@@ -82,7 +100,6 @@ export default function DashboardLayout({
               textDecoration: "none",
             }}
           >
-            <LockerLogo size={22} />
             <span
               style={{
                 fontFamily: "var(--font-display)",
