@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Locker",
   "description": "Quickly store API keys to Locker — your secure credential vault for AI agents.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "permissions": ["storage"],
   "host_permissions": [
     "https://api-production-449f.up.railway.app/*"
