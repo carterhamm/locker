@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { FadingBorder } from "@/components/FadingBorder";
 
 function CopyLine({ command, comment }: { command: string; comment: string }) {
   const [copied, setCopied] = useState(false);
@@ -39,66 +40,79 @@ function CopyLine({ command, comment }: { command: string; comment: string }) {
   );
 }
 
+function SettingsCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: "32px" }}>
+      <h2 style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "11px",
+        fontWeight: 600,
+        marginBottom: "12px",
+        color: "var(--text-tertiary)",
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+      }}>
+        {title}
+      </h2>
+      <div
+        style={{
+          padding: "22px 24px",
+          borderRadius: "var(--radius-lg)",
+          background: "rgba(255,255,255,0.02)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <FadingBorder radius="var(--radius-lg)" />
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
 
   return (
     <div>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "32px" }}>
-        Settings
-      </h1>
-
-      {/* Account Section */}
-      <div style={{ marginBottom: "40px" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 600, marginBottom: "16px", color: "var(--text-secondary)" }}>
-          Account
+      <div style={{ marginBottom: "32px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 600, letterSpacing: "-0.01em", marginBottom: "6px" }}>
+          Settings
         </h2>
-
-        <div
-          style={{
-            padding: "20px 24px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-subtle)",
-            background: "var(--bg-card)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <div style={{ fontSize: "13px", color: "var(--text-secondary)", fontFamily: "var(--font-body)", marginBottom: "2px" }}>
-                Email
-              </div>
-              <div style={{ fontSize: "15px", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text-primary)" }}>
-                {user?.email}
-              </div>
-            </div>
-            <div
-              style={{
-                padding: "4px 12px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(34,197,94,0.1)",
-                color: "var(--success)",
-                fontSize: "12px",
-                fontWeight: 500,
-              }}
-            >
-              Free Plan
-            </div>
-          </div>
-        </div>
+        <p style={{ color: "var(--text-tertiary)", fontSize: "13px", fontFamily: "var(--font-body)" }}>
+          Manage your account and preferences.
+        </p>
       </div>
 
-      {/* CLI Section */}
-      <div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 600, marginBottom: "16px", color: "var(--text-secondary)" }}>
-          CLI Quick Start
-        </h2>
+      <SettingsCard title="Account">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: "11px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              Email
+            </div>
+            <div style={{ fontSize: "15px", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text-primary)" }}>
+              {user?.email}
+            </div>
+          </div>
+          <div
+            style={{
+              padding: "5px 14px",
+              borderRadius: "100px",
+              background: "rgba(34,197,94,0.08)",
+              color: "var(--success)",
+              fontSize: "12px",
+              fontWeight: 500,
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            Free Plan
+          </div>
+        </div>
+      </SettingsCard>
 
+      <SettingsCard title="CLI Quick Start">
         <div
           style={{
-            padding: "24px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-subtle)",
-            background: "var(--bg-tertiary)",
             fontFamily: "var(--font-mono)",
             fontSize: "13px",
             lineHeight: "2",
@@ -110,7 +124,7 @@ export default function SettingsPage() {
           <CopyLine command="locker set openai sk-proj-..." comment="Store a key" />
           <CopyLine command="locker get openai" comment="Retrieve (agents call this)" />
         </div>
-      </div>
+      </SettingsCard>
     </div>
   );
 }

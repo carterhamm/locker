@@ -222,7 +222,7 @@ export default function LandingPage() {
               overflow: "hidden",
             }}
           >
-            <FadingBorder radius="100px" />
+            <FadingBorder radius="100px" color="rgba(255,255,255,0.25)" colorFaded="rgba(255,255,255,0.06)" />
             <GitHubIcon size={16} />
             GitHub
           </a>

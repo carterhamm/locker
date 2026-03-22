@@ -1,12 +1,41 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
+import { FadingBorder } from "@/components/FadingBorder";
+import { ShieldLockIcon, BoltIcon, AuditLogIcon } from "@/components/Icons";
 
 interface StoredKey {
   service: string;
   createdAt: string;
   lastUsed: string | null;
+}
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div
+      style={{
+        flex: "1 1 0",
+        padding: "24px",
+        borderRadius: "var(--radius-lg)",
+        background: "rgba(255,255,255,0.02)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <FadingBorder radius="var(--radius-lg)" />
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", color: "var(--text-tertiary)" }}>
+        {icon}
+        <span style={{ fontSize: "12px", fontFamily: "var(--font-body)", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {label}
+        </span>
+      </div>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 700, letterSpacing: "-0.02em" }}>
+        {value}
+      </div>
+    </div>
+  );
 }
 
 export default function KeysPage() {
@@ -33,7 +62,7 @@ export default function KeysPage() {
         setKeys(data.services || []);
       }
     } catch {
-      // API not running — don't show error for demo
+      // API not running
     } finally {
       setLoading(false);
     }
@@ -103,19 +132,50 @@ export default function KeysPage() {
     );
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px 16px",
+    borderRadius: "var(--radius-md)",
+    border: "none",
+    background: "rgba(255,255,255,0.04)",
+    color: "var(--text-primary)",
+    fontFamily: "var(--font-body)",
+    fontSize: "14px",
+    outline: "none",
+    transition: "box-shadow 150ms ease",
+  };
+
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-          API Keys
-        </h1>
+      {/* Stat cards row */}
+      <div style={{ display: "flex", gap: "12px", marginBottom: "40px" }}>
+        <StatCard
+          icon={<ShieldLockIcon size={16} />}
+          label="Stored Keys"
+          value={String(keys.length)}
+        />
+        <StatCard
+          icon={<BoltIcon size={16} />}
+          label="Retrievals"
+          value="—"
+        />
+        <StatCard
+          icon={<AuditLogIcon size={16} />}
+          label="Last Access"
+          value="—"
+        />
+      </div>
 
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 600, letterSpacing: "-0.01em" }}>
+          Your Keys
+        </h2>
         <button
           onClick={() => setShowAdd(!showAdd)}
           style={{
             padding: "8px 20px",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "100px",
             border: "none",
             background: "#ffffff",
             color: "#000000",
@@ -123,188 +183,220 @@ export default function KeysPage() {
             fontSize: "13px",
             fontWeight: 600,
             cursor: "pointer",
-            letterSpacing: "0.02em",
+            transition: "all 200ms ease",
           }}
         >
-          {showAdd ? "Cancel" : "Add Key"}
+          {showAdd ? "Cancel" : "+ Add Key"}
         </button>
       </div>
 
       {/* Status messages */}
-      {error && (
-        <div style={{
-          padding: "10px 16px",
-          borderRadius: "var(--radius-sm)",
-          background: "rgba(239,68,68,0.1)",
-          border: "1px solid rgba(239,68,68,0.2)",
-          color: "var(--error)",
-          fontSize: "13px",
-          marginBottom: "16px",
-          fontFamily: "var(--font-body)",
-        }}>
-          {error}
-        </div>
-      )}
-      {success && (
-        <div style={{
-          padding: "10px 16px",
-          borderRadius: "var(--radius-sm)",
-          background: "rgba(34,197,94,0.1)",
-          border: "1px solid rgba(34,197,94,0.2)",
-          color: "var(--success)",
-          fontSize: "13px",
-          marginBottom: "16px",
-          fontFamily: "var(--font-body)",
-        }}>
-          {success}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            style={{
+              padding: "12px 18px",
+              borderRadius: "var(--radius-md)",
+              background: "rgba(239,68,68,0.08)",
+              color: "var(--error)",
+              fontSize: "13px",
+              marginBottom: "16px",
+              fontFamily: "var(--font-body)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <FadingBorder radius="var(--radius-md)" color="rgba(239,68,68,0.2)" colorFaded="rgba(239,68,68,0.04)" />
+            {error}
+          </motion.div>
+        )}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            style={{
+              padding: "12px 18px",
+              borderRadius: "var(--radius-md)",
+              background: "rgba(34,197,94,0.08)",
+              color: "var(--success)",
+              fontSize: "13px",
+              marginBottom: "16px",
+              fontFamily: "var(--font-body)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <FadingBorder radius="var(--radius-md)" color="rgba(34,197,94,0.2)" colorFaded="rgba(34,197,94,0.04)" />
+            {success}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Add Key Form */}
-      {showAdd && (
-        <form
-          onSubmit={handleAdd}
-          style={{
-            padding: "24px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-subtle)",
-            background: "var(--bg-card)",
-            marginBottom: "24px",
-          }}
-        >
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-end" }}>
-            <div style={{ flex: "1 1 200px" }}>
-              <label style={{ display: "block", marginBottom: "4px", color: "var(--text-secondary)", fontSize: "12px", fontFamily: "var(--font-body)", letterSpacing: "0.02em" }}>
-                Service name
-              </label>
-              <input
-                type="text"
-                value={newService}
-                onChange={(e) => setNewService(e.target.value)}
-                required
-                placeholder="e.g. openai, resend, stripe"
-                style={{
-                  width: "100%",
-                  padding: "10px 14px",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--border-medium)",
-                  background: "var(--bg-input)",
-                  color: "var(--text-primary)",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "14px",
-                  outline: "none",
-                }}
-              />
-            </div>
-            <div style={{ flex: "2 1 300px" }}>
-              <label style={{ display: "block", marginBottom: "4px", color: "var(--text-secondary)", fontSize: "12px", fontFamily: "var(--font-body)", letterSpacing: "0.02em" }}>
-                API Key
-              </label>
-              <input
-                type="password"
-                value={newKey}
-                onChange={(e) => setNewKey(e.target.value)}
-                required
-                placeholder="sk-..."
-                style={{
-                  width: "100%",
-                  padding: "10px 14px",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--border-medium)",
-                  background: "var(--bg-input)",
-                  color: "var(--text-primary)",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "14px",
-                  outline: "none",
-                }}
-              />
-            </div>
-            <button
-              type="submit"
+      <AnimatePresence>
+        {showAdd && (
+          <motion.form
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: "hidden", marginBottom: "24px" }}
+            onSubmit={handleAdd}
+          >
+            <div
               style={{
-                padding: "10px 24px",
-                borderRadius: "var(--radius-sm)",
-                border: "none",
-                background: "#ffffff",
-                color: "#000000",
-                fontFamily: "var(--font-body)",
-                fontSize: "13px",
-                fontWeight: 600,
-                cursor: "pointer",
-                letterSpacing: "0",
-                whiteSpace: "nowrap",
+                padding: "24px",
+                borderRadius: "var(--radius-lg)",
+                background: "rgba(255,255,255,0.02)",
+                position: "relative",
+                overflow: "hidden",
               }}
             >
-              Store Key
-            </button>
-          </div>
-        </form>
-      )}
+              <FadingBorder radius="var(--radius-lg)" />
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-end" }}>
+                <div style={{ flex: "1 1 200px" }}>
+                  <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                    Service
+                  </label>
+                  <input type="text" value={newService} onChange={(e) => setNewService(e.target.value)} required placeholder="openai" style={inputStyle} />
+                </div>
+                <div style={{ flex: "2 1 300px" }}>
+                  <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                    API Key
+                  </label>
+                  <input type="password" value={newKey} onChange={(e) => setNewKey(e.target.value)} required placeholder="sk-..." style={inputStyle} />
+                </div>
+                <button
+                  type="submit"
+                  style={{
+                    padding: "12px 28px",
+                    borderRadius: "var(--radius-md)",
+                    border: "none",
+                    background: "#ffffff",
+                    color: "#000000",
+                    fontFamily: "var(--font-body)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Store Key
+                </button>
+              </div>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
 
       {/* Keys List */}
       {keys.length === 0 ? (
-        <div style={{
-          padding: "60px",
-          textAlign: "center",
-          color: "var(--text-tertiary)",
-          fontFamily: "var(--font-body)",
-          fontSize: "14px",
-          border: "1px dashed var(--border-subtle)",
-          borderRadius: "var(--radius-lg)",
-        }}>
-          <p style={{ marginBottom: "8px" }}>No API keys stored yet</p>
-          <p style={{ fontSize: "13px" }}>Click &quot;Add Key&quot; to store your first key</p>
+        <div
+          style={{
+            padding: "60px 40px",
+            textAlign: "center",
+            borderRadius: "var(--radius-lg)",
+            background: "rgba(255,255,255,0.015)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <FadingBorder radius="var(--radius-lg)" colorFaded="rgba(255,255,255,0.01)" />
+          <div style={{ fontSize: "32px", marginBottom: "16px", opacity: 0.3 }}>
+            <ShieldLockIcon size={40} />
+          </div>
+          <p style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: "15px", marginBottom: "6px" }}>
+            No API keys stored yet
+          </p>
+          <p style={{ color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontSize: "13px" }}>
+            Click &quot;+ Add Key&quot; to store your first key
+          </p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           {keys.map((k, i) => (
-            <div
+            <motion.div
               key={k.service}
-              className="animate-in"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.3 }}
               style={{
-                animationDelay: `${i * 40}ms`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "16px 20px",
+                padding: "18px 22px",
                 borderRadius: "var(--radius-md)",
-                border: "1px solid var(--border-subtle)",
-                background: "var(--bg-card)",
-                transition: `all var(--duration-fast) ease`,
+                background: "rgba(255,255,255,0.02)",
+                transition: "all 200ms ease",
+                position: "relative",
+                overflow: "hidden",
+                cursor: "default",
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.02)";
               }}
             >
-              <div>
-                <div style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "15px",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "2px",
-                }}>
-                  {k.service}
+              <FadingBorder radius="var(--radius-md)" />
+              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "var(--radius-sm)",
+                    background: "rgba(255,255,255,0.04)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: "var(--text-secondary)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {k.service.slice(0, 2)}
                 </div>
-                <div style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
-                  Added {new Date(k.createdAt).toLocaleDateString()}
-                  {k.lastUsed && ` \u2022 Last used ${new Date(k.lastUsed).toLocaleDateString()}`}
+                <div>
+                  <div style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                    marginBottom: "2px",
+                  }}>
+                    {k.service}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+                    Added {new Date(k.createdAt).toLocaleDateString()}
+                    {k.lastUsed && ` \u2022 Last used ${new Date(k.lastUsed).toLocaleDateString()}`}
+                  </div>
                 </div>
               </div>
               <button
                 onClick={() => handleRevoke(k.service)}
                 style={{
-                  padding: "4px 12px",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid rgba(239,68,68,0.3)",
-                  background: "transparent",
+                  padding: "6px 14px",
+                  borderRadius: "100px",
+                  border: "none",
+                  background: "rgba(239,68,68,0.08)",
                   color: "var(--error)",
                   fontFamily: "var(--font-body)",
                   fontSize: "12px",
+                  fontWeight: 500,
                   cursor: "pointer",
-                  letterSpacing: "0",
+                  transition: "all 150ms ease",
                 }}
               >
                 Revoke
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

@@ -3,15 +3,16 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { LockerLogo, GitHubIcon } from "@/components/Icons";
+import { LockerLogo } from "@/components/Icons";
+import { FadingBorder } from "@/components/FadingBorder";
 import Link from "next/link";
 
 const PAGE_PADDING = 40;
 
 const navItems = [
-  { href: "/dashboard", label: "Keys" },
-  { href: "/dashboard/logs", label: "Logs" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard", label: "Keys", icon: "K" },
+  { href: "/dashboard/logs", label: "Logs", icon: "L" },
+  { href: "/dashboard/settings", label: "Settings", icon: "S" },
 ];
 
 export default function DashboardLayout({
@@ -39,6 +40,7 @@ export default function DashboardLayout({
           justifyContent: "center",
           color: "var(--text-tertiary)",
           fontFamily: "var(--font-body)",
+          background: "var(--bg-primary)",
         }}
       >
         Loading...
@@ -47,19 +49,30 @@ export default function DashboardLayout({
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-primary)" }}>
+      {/* Mesh gradient background */}
+      <div className="mesh-gradient">
+        <div className="orb" />
+        <div className="orb" />
+        <div className="orb" />
+      </div>
+
       {/* ── Top Bar ── */}
       <header
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: `12px ${PAGE_PADDING}px`,
+          padding: `14px ${PAGE_PADDING}px`,
           borderBottom: "1px solid var(--border-subtle)",
-          background: "var(--bg-secondary)",
+          backdropFilter: "blur(20px)",
+          background: "rgba(0,0,0,0.4)",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
           <Link
             href="/"
             style={{
@@ -83,7 +96,7 @@ export default function DashboardLayout({
             </span>
           </Link>
 
-          <nav style={{ display: "flex", gap: "4px" }}>
+          <nav style={{ display: "flex", gap: "2px" }}>
             {navItems.map((item) => {
               const isActive =
                 item.href === "/dashboard"
@@ -95,52 +108,87 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   style={{
-                    padding: "6px 14px",
+                    padding: "7px 16px",
                     borderRadius: "var(--radius-sm)",
                     fontFamily: "var(--font-body)",
                     fontSize: "13px",
-                    fontWeight: 500,
-                    color: isActive ? "var(--text-accent)" : "var(--text-secondary)",
-                    background: isActive ? "var(--bg-card-hover)" : "transparent",
+                    fontWeight: isActive ? 600 : 400,
+                    color: isActive ? "var(--text-primary)" : "var(--text-tertiary)",
+                    background: isActive ? "rgba(255,255,255,0.06)" : "transparent",
                     textDecoration: "none",
-                    transition: `all var(--duration-fast) ease`,
-                    border: "1px solid transparent",
+                    transition: "all 200ms ease",
+                    position: "relative",
                   }}
                 >
                   {item.label}
+                  {isActive && (
+                    <div style={{
+                      position: "absolute",
+                      bottom: -1,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "16px",
+                      height: "2px",
+                      borderRadius: "1px",
+                      background: "#ffffff",
+                    }} />
+                  )}
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* Right side — consistent right edge with PAGE_PADDING */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div
             style={{
-              color: "var(--text-tertiary)",
-              fontSize: "12px",
-              fontFamily: "var(--font-body)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 14px",
+              borderRadius: "100px",
+              background: "rgba(255,255,255,0.04)",
+              position: "relative",
             }}
           >
-            {user.email}
-          </span>
+            <FadingBorder radius="100px" colorFaded="rgba(255,255,255,0.01)" />
+            <div
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "var(--success)",
+              }}
+            />
+            <span
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: "12px",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              {user.email}
+            </span>
+          </div>
           <button
             onClick={() => {
               logout();
               router.push("/");
             }}
             style={{
-              padding: "4px 12px",
+              padding: "6px 14px",
               borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-subtle)",
-              background: "transparent",
-              color: "var(--text-secondary)",
+              border: "none",
+              background: "rgba(255,255,255,0.04)",
+              color: "var(--text-tertiary)",
               fontFamily: "var(--font-body)",
               fontSize: "12px",
               cursor: "pointer",
+              transition: "all 150ms ease",
+              position: "relative",
             }}
           >
+            <FadingBorder radius="var(--radius-sm)" colorFaded="rgba(255,255,255,0.01)" />
             Logout
           </button>
         </div>
@@ -150,10 +198,11 @@ export default function DashboardLayout({
       <main
         style={{
           flex: 1,
-          padding: `32px ${PAGE_PADDING}px`,
+          padding: `40px ${PAGE_PADDING}px`,
           maxWidth: "1100px",
           width: "100%",
           margin: "0 auto",
+          position: "relative",
         }}
       >
         {children}
