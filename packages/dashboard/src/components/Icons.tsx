@@ -78,15 +78,14 @@ export function GitHubIcon({ size = 24, className = "" }: { size?: number; class
 
 export function LockerLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
-      {/* Vault body */}
-      <rect x="4" y="10" width="24" height="18" rx="3" stroke="white" strokeWidth="2" />
-      {/* Lock shackle */}
-      <path d="M10 10V8a6 6 0 0 1 12 0v2" stroke="white" strokeWidth="2" strokeLinecap="round" />
-      {/* Keyhole */}
-      <circle cx="16" cy="19" r="2.5" fill="white" />
-      <rect x="15" y="20.5" width="2" height="3.5" rx="1" fill="white" />
-    </svg>
+    <img
+      src="/logo.png"
+      alt="Locker"
+      width={size}
+      height={size}
+      className={className}
+      style={{ objectFit: "contain" }}
+    />
   );
 }
 

@@ -6,7 +6,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Locker — Secure API Keys for AI Agents",
   description:
-    "1Password for AI agents. Store, retrieve, and manage API keys securely. One login, every key available to any agent.",
+    "The secure vault for API credentials. Store, retrieve, and manage API keys securely. One login, every key available to any agent.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/logo-180.png",
+  },
 };
 
 export default function RootLayout({

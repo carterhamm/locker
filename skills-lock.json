@@ -31,6 +31,11 @@
       "sourceType": "github",
       "computedHash": "7db385e4c5370e5a7fca9704a1361b056e4504ea6a03924bb86f33a4f00b5c73"
     },
+    "locker": {
+      "source": "carterhamm/locker",
+      "sourceType": "github",
+      "computedHash": "351835e88dc00b3061edecb39ca89c21f53ee81fbff699c1e1f5165cb01b9b6a"
+    },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",

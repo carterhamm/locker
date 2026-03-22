@@ -4,6 +4,9 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG API_URL=https://api-production-449f.up.railway.app
+ENV NEXT_PUBLIC_API_URL=$API_URL
+ENV API_INTERNAL_URL=$API_URL
 RUN npm run build
 
 FROM node:22-slim AS runner
