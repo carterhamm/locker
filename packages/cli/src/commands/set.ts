@@ -46,6 +46,11 @@ export async function setCommand(service: string, key: string | undefined, optio
     { service, key: apiKey }
   );
 
+  if (res.status === 409) {
+    console.error(`"${service}" already exists. Run: locker revoke ${service}`);
+    process.exit(1);
+  }
+
   if (!res.ok) {
     console.error(res.data.error || "Failed to store key.");
     process.exit(1);

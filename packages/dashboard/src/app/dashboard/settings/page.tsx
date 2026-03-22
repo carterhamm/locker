@@ -73,12 +73,12 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
 
 export default function SettingsPage() {
   const { user, token } = useAuth();
-  const [passkeyStatus, setPasskeyStatus] = useState<string | null>(null);
-  const [passkeyError, setPasskeyError] = useState<string | null>(null);
+  const [passkeyState, setPasskeyState] = useState<"idle" | "registering" | "registered" | "error">("idle");
+  const [passkeyError, setPasskeyError] = useState("");
 
   async function handleRegisterPasskey() {
-    setPasskeyStatus(null);
-    setPasskeyError(null);
+    setPasskeyState("registering");
+    setPasskeyError("");
 
     try {
       // Get registration options
@@ -92,7 +92,7 @@ export default function SettingsPage() {
       });
 
       if (!optRes.ok) {
-        setPasskeyError("Failed to get registration options");
+        setPasskeyState("error"); setPasskeyError("Failed to start registration");
         return;
       }
 
@@ -114,16 +114,16 @@ export default function SettingsPage() {
 
       if (!verifyRes.ok) {
         const data = await verifyRes.json();
-        setPasskeyError(data.error || "Registration failed");
+        setPasskeyState("error"); setPasskeyError(data.error || "Registration failed");
         return;
       }
 
-      setPasskeyStatus("Passkey registered successfully");
+      setPasskeyState("registered");
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "NotAllowedError") {
-        setPasskeyError("Registration was cancelled");
+        setPasskeyState("error"); setPasskeyError("Cancelled");
       } else {
-        setPasskeyError("Passkey registration failed");
+        setPasskeyState("error"); setPasskeyError("Registration failed");
       }
     }
   }
@@ -175,32 +175,38 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {passkeyStatus && (
-          <div style={{ padding: "8px 14px", borderRadius: "8px", background: "rgba(50,215,75,0.08)", color: "var(--success)", fontSize: "12px", marginBottom: "12px" }}>
-            {passkeyStatus}
-          </div>
-        )}
-        {passkeyError && (
-          <div style={{ padding: "8px 14px", borderRadius: "8px", background: "rgba(239,68,68,0.08)", color: "var(--error)", fontSize: "12px", marginBottom: "12px" }}>
-            {passkeyError}
-          </div>
-        )}
-
         <button
-          onClick={handleRegisterPasskey}
+          onClick={passkeyState === "registered" ? undefined : handleRegisterPasskey}
+          disabled={passkeyState === "registering" || passkeyState === "registered"}
           style={{
             padding: "10px 20px",
             borderRadius: "10px",
-            border: "none",
-            background: "#ffffff",
-            color: "#000000",
+            border: passkeyState === "registered"
+              ? "1px solid rgba(50,215,75,0.3)"
+              : passkeyState === "error"
+              ? "1px solid rgba(239,68,68,0.25)"
+              : "none",
+            background: passkeyState === "registered"
+              ? "rgba(50,215,75,0.12)"
+              : passkeyState === "error"
+              ? "rgba(239,68,68,0.1)"
+              : "#ffffff",
+            color: passkeyState === "registered"
+              ? "var(--success)"
+              : passkeyState === "error"
+              ? "var(--error)"
+              : "#000000",
             fontFamily: "var(--font-body)",
             fontSize: "13px",
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: passkeyState === "registered" ? "default" : "pointer",
+            transition: "all 250ms ease",
           }}
         >
-          Register Passkey
+          {passkeyState === "registering" && "Registering..."}
+          {passkeyState === "registered" && "✓ Passkey Registered"}
+          {passkeyState === "error" && passkeyError}
+          {passkeyState === "idle" && "Register Passkey"}
         </button>
       </SettingsCard>
 
