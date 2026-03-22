@@ -6,12 +6,14 @@
   "workspaces": [
     "packages/api",
     "packages/cli",
-    "packages/dashboard"
+    "packages/dashboard",
+    "packages/mcp"
   ],
   "scripts": {
     "dev:api": "npm run dev --workspace=packages/api",
     "dev:dashboard": "npm run dev --workspace=packages/dashboard",
-    "test": "npm run test --workspace=packages/api && npm run test --workspace=packages/cli",
+    "test": "npm run test --workspace=packages/api && npm run test --workspace=packages/cli && npm run test --workspace=packages/mcp",
+    "test:mcp": "npm run test --workspace=packages/mcp",
     "test:api": "npm run test --workspace=packages/api",
     "test:cli": "npm run test --workspace=packages/cli",
     "build": "npm run build --workspaces --if-present",

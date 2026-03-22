@@ -97,7 +97,8 @@ export default function KeysPage() {
       }
     } catch {
       if (isDemo) {
-        setSuccess(`Key stored for ${newService} (demo mode)`);
+        setKeys(prev => [...prev, { service: newService.toLowerCase().trim(), createdAt: new Date().toISOString(), lastUsed: null }]);
+        setSuccess(`Key stored for ${newService}`);
         setNewService("");
         setNewKey("");
         setShowAdd(false);
@@ -306,7 +307,7 @@ export default function KeysPage() {
           }}
         >
           <FadingBorder radius="var(--radius-lg)" colorFaded="rgba(255,255,255,0.01)" />
-          <div style={{ fontSize: "32px", marginBottom: "16px", opacity: 0.3 }}>
+          <div style={{ marginBottom: "16px", opacity: 0.3, display: "flex", justifyContent: "center" }}>
             <ShieldLockIcon size={40} />
           </div>
           <p style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: "15px", marginBottom: "6px" }}>
