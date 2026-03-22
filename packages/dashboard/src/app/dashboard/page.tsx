@@ -248,6 +248,7 @@ export default function KeysPage() {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             style={{ overflow: "hidden", marginBottom: "24px" }}
             onSubmit={handleAdd}
+            autoComplete="off"
           >
             <div
               style={{
@@ -270,7 +271,7 @@ export default function KeysPage() {
                   <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                     API Key
                   </label>
-                  <input type="password" value={newKey} onChange={(e) => setNewKey(e.target.value)} required placeholder="sk-..." style={inputStyle} />
+                  <input type="text" value={newKey} onChange={(e) => setNewKey(e.target.value)} required placeholder="sk-..." autoComplete="off" data-1p-ignore data-lpignore="true" style={{...inputStyle, WebkitTextSecurity: "disc" as any}} />
                 </div>
                 <button
                   type="submit"

@@ -40,14 +40,14 @@
       <button id="logout-btn" class="btn-ghost">Logout</button>
     </div>
 
-    <form id="store-form">
+    <form id="store-form" autocomplete="off">
       <div class="field">
         <label>Name</label>
-        <input type="text" id="service-name" placeholder="openai" required autofocus>
+        <input type="text" id="service-name" placeholder="openai" required autofocus autocomplete="off">
       </div>
       <div class="field">
         <label>API Key</label>
-        <input type="password" id="api-key" placeholder="sk-..." required>
+        <input type="text" id="api-key" placeholder="sk-..." required autocomplete="off" data-1p-ignore data-lpignore="true" style="-webkit-text-security: disc">
       </div>
       <div id="store-error" class="error hidden"></div>
       <div id="store-success" class="success hidden"></div>
