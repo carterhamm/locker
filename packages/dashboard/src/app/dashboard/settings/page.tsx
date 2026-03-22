@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { FadingBorder } from "@/components/FadingBorder";
 import { startRegistration } from "@simplewebauthn/browser";
@@ -73,8 +73,29 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
 
 export default function SettingsPage() {
   const { user, token } = useAuth();
-  const [passkeyState, setPasskeyState] = useState<"idle" | "registering" | "registered" | "error">("idle");
+  const [passkeyState, setPasskeyState] = useState<"idle" | "registering" | "registered" | "has-passkey" | "error">("idle");
   const [passkeyError, setPasskeyError] = useState("");
+  const [passkeyCount, setPasskeyCount] = useState(0);
+
+  // Check if user already has passkeys
+  useEffect(() => {
+    (async () => {
+      try {
+        const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+        if (!authToken) return;
+        const res = await fetch("/api/passkeys/count", {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.count > 0) {
+            setPasskeyCount(data.count);
+            setPasskeyState("has-passkey");
+          }
+        }
+      } catch {}
+    })();
+  }, [token]);
 
   async function handleRegisterPasskey() {
     setPasskeyState("registering");
@@ -176,22 +197,22 @@ export default function SettingsPage() {
         </div>
 
         <button
-          onClick={passkeyState === "registered" ? undefined : handleRegisterPasskey}
-          disabled={passkeyState === "registering" || passkeyState === "registered"}
+          onClick={(passkeyState === "registered" || passkeyState === "has-passkey") ? undefined : handleRegisterPasskey}
+          disabled={passkeyState === "registering" || passkeyState === "registered" || passkeyState === "has-passkey"}
           style={{
             padding: "10px 20px",
             borderRadius: "10px",
-            border: passkeyState === "registered"
+            border: (passkeyState === "registered" || passkeyState === "has-passkey")
               ? "1px solid rgba(50,215,75,0.3)"
               : passkeyState === "error"
               ? "1px solid rgba(239,68,68,0.25)"
               : "none",
-            background: passkeyState === "registered"
+            background: (passkeyState === "registered" || passkeyState === "has-passkey")
               ? "rgba(50,215,75,0.12)"
               : passkeyState === "error"
               ? "rgba(239,68,68,0.1)"
               : "#ffffff",
-            color: passkeyState === "registered"
+            color: (passkeyState === "registered" || passkeyState === "has-passkey")
               ? "var(--success)"
               : passkeyState === "error"
               ? "var(--error)"
@@ -199,12 +220,13 @@ export default function SettingsPage() {
             fontFamily: "var(--font-body)",
             fontSize: "13px",
             fontWeight: 600,
-            cursor: passkeyState === "registered" ? "default" : "pointer",
+            cursor: (passkeyState === "registered" || passkeyState === "has-passkey") ? "default" : "pointer",
             transition: "all 250ms ease",
           }}
         >
           {passkeyState === "registering" && "Registering..."}
           {passkeyState === "registered" && "✓ Passkey Registered"}
+          {passkeyState === "has-passkey" && `✓ Passkey Active`}
           {passkeyState === "error" && passkeyError}
           {passkeyState === "idle" && "Register Passkey"}
         </button>

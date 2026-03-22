@@ -18,6 +18,23 @@ import { authenticate } from "../middleware/auth";
 
 export const passkeysRouter = Router();
 
+/**
+ * GET /passkeys/count
+ * Returns how many passkeys the user has registered.
+ */
+passkeysRouter.get("/count", authenticate, async (req: Request, res: Response) => {
+  try {
+    const pool = getPool();
+    const result = await pool.query(
+      "SELECT COUNT(*) as count FROM passkey_credentials WHERE user_id = $1",
+      [req.user!.userId]
+    );
+    res.json({ count: Number(result.rows[0].count) });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // RP config — update these for production
 const RP_NAME = "Locker";
 const RP_ID = process.env.PASSKEY_RP_ID || "localhost";

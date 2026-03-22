@@ -8,6 +8,7 @@ import { getCommand } from "./commands/get";
 import { setCommand } from "./commands/set";
 import { listCommand } from "./commands/list";
 import { revokeCommand } from "./commands/revoke";
+import { updateCommand } from "./commands/update";
 import { mcpInstallCommand, mcpUninstallCommand } from "./commands/mcp";
 
 const program = new Command();
@@ -55,6 +56,12 @@ program
   .command("revoke <service>")
   .description("Delete a stored API key")
   .action(revokeCommand);
+
+program
+  .command("update <service> [key]")
+  .description("Update an existing API key")
+  .option("--stdin", "Read key from stdin")
+  .action(updateCommand);
 
 const mcp = program
   .command("mcp")

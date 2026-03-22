@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { MobileGate } from "@/components/MobileGate";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ export default function RootLayout({
       </head>
       <body className="grain-overlay">
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider><MobileGate>{children}</MobileGate></AuthProvider>
         </ThemeProvider>
       </body>
     </html>

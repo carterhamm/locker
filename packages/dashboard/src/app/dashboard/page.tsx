@@ -328,8 +328,7 @@ export default function KeysPage() {
       {keys.length === 0 ? (
         <div
           style={{
-            padding: "60px 40px",
-            textAlign: "center",
+            padding: "48px 40px",
             borderRadius: "var(--radius-lg)",
             background: "rgba(255,255,255,0.015)",
             position: "relative",
@@ -337,15 +336,40 @@ export default function KeysPage() {
           }}
         >
           <FadingBorder radius="var(--radius-lg)" colorFaded="rgba(255,255,255,0.01)" />
-          <div style={{ marginBottom: "16px", opacity: 0.3, display: "flex", justifyContent: "center" }}>
-            <ShieldLockIcon size={40} />
+          <div style={{ textAlign: "center", marginBottom: "32px" }}>
+            <div style={{ marginBottom: "16px", opacity: 0.3, display: "flex", justifyContent: "center" }}>
+              <ShieldLockIcon size={40} />
+            </div>
+            <p style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 600, marginBottom: "6px" }}>
+              Get started in 3 steps
+            </p>
+            <p style={{ color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontSize: "13px" }}>
+              Store your first API key and start using Locker
+            </p>
           </div>
-          <p style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: "15px", marginBottom: "6px" }}>
-            No API keys stored yet
-          </p>
-          <p style={{ color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontSize: "13px" }}>
-            Click &quot;+ Add Key&quot; to store your first key
-          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "400px", margin: "0 auto" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+              <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", flexShrink: 0, marginTop: "1px" }}>1</div>
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 500, fontFamily: "var(--font-body)", marginBottom: "2px" }}>Add a key</div>
+                <div style={{ fontSize: "12px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>Click &quot;+ Add Key&quot; above, or use the Chrome extension</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+              <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", flexShrink: 0, marginTop: "1px" }}>2</div>
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 500, fontFamily: "var(--font-body)", marginBottom: "2px" }}>Install the CLI</div>
+                <div style={{ fontSize: "12px", color: "var(--text-tertiary)", fontFamily: "var(--font-mono)" }}>npm install -g locker-cli</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+              <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", flexShrink: 0, marginTop: "1px" }}>3</div>
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 500, fontFamily: "var(--font-body)", marginBottom: "2px" }}>Retrieve from anywhere</div>
+                <div style={{ fontSize: "12px", color: "var(--text-tertiary)", fontFamily: "var(--font-mono)" }}>locker get openai</div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
