@@ -8,6 +8,7 @@ import { getCommand } from "./commands/get";
 import { setCommand } from "./commands/set";
 import { listCommand } from "./commands/list";
 import { revokeCommand } from "./commands/revoke";
+import { mcpInstallCommand, mcpUninstallCommand } from "./commands/mcp";
 
 const program = new Command();
 
@@ -53,5 +54,19 @@ program
   .command("revoke <service>")
   .description("Delete a stored API key")
   .action(revokeCommand);
+
+const mcp = program
+  .command("mcp")
+  .description("Manage the Locker MCP server");
+
+mcp
+  .command("install")
+  .description("Install Locker MCP server into Claude Code, Cursor, etc.")
+  .action(mcpInstallCommand);
+
+mcp
+  .command("uninstall")
+  .description("Remove Locker MCP server from AI tools")
+  .action(mcpUninstallCommand);
 
 program.parse();
