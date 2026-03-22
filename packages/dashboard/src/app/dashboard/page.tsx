@@ -155,6 +155,41 @@ export default function KeysPage() {
     }
   }
 
+  const [updatingService, setUpdatingService] = useState<string | null>(null);
+  const [updateKey, setUpdateKey] = useState("");
+
+  async function handleUpdate(service: string) {
+    if (!updateKey) return;
+    setAlert(null);
+    try {
+      const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+      // Revoke old
+      await fetch(`/api/keys/${encodeURIComponent(service)}`, {
+        method: "DELETE",
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+      });
+      // Store new
+      const res = await fetch("/api/keys", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({ service, key: updateKey }),
+      });
+      if (res.ok) {
+        showAlert(`Updated: ${service}`, "success");
+        setUpdatingService(null);
+        setUpdateKey("");
+        fetchKeys();
+      } else {
+        showAlert("Update failed", "error");
+      }
+    } catch {
+      showAlert("Update failed", "error");
+    }
+  }
+
   async function handleRevoke(service: string) {
     setAlert(null);
     try {
@@ -434,23 +469,81 @@ export default function KeysPage() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => handleRevoke(k.service)}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: "100px",
-                  border: "none",
-                  background: "rgba(239,68,68,0.08)",
-                  color: "var(--error)",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 150ms ease",
-                }}
-              >
-                Revoke
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                {updatingService === k.service ? (
+                  <>
+                    <input
+                      type="text"
+                      value={updateKey}
+                      onChange={(e) => setUpdateKey(e.target.value)}
+                      placeholder="New key..."
+                      autoFocus
+                      autoComplete="off"
+                      data-1p-ignore
+                      onKeyDown={(e) => { if (e.key === "Escape") { setUpdatingService(null); setUpdateKey(""); } if (e.key === "Enter") handleUpdate(k.service); }}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "6px",
+                        border: "none",
+                        background: "rgba(255,255,255,0.06)",
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "12px",
+                        outline: "none",
+                        width: "140px",
+                        ...({WebkitTextSecurity: "disc"} as React.CSSProperties),
+                      }}
+                    />
+                    <button
+                      onClick={() => handleUpdate(k.service)}
+                      style={{
+                        padding: "5px 12px", borderRadius: "100px", border: "none",
+                        background: "#ffffff", color: "#000000",
+                        fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => { setUpdatingService(null); setUpdateKey(""); }}
+                      style={{
+                        padding: "5px 10px", borderRadius: "100px", border: "none",
+                        background: "rgba(255,255,255,0.04)", color: "var(--text-tertiary)",
+                        fontFamily: "var(--font-body)", fontSize: "11px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => { setUpdatingService(k.service); setUpdateKey(""); }}
+                      style={{
+                        padding: "6px 14px", borderRadius: "100px", border: "none",
+                        background: "rgba(255,255,255,0.04)", color: "var(--text-secondary)",
+                        fontFamily: "var(--font-body)", fontSize: "12px", fontWeight: 500,
+                        cursor: "pointer", transition: "all 150ms ease",
+                      }}
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleRevoke(k.service)}
+                      style={{
+                        padding: "6px 14px", borderRadius: "100px", border: "none",
+                        background: "rgba(239,68,68,0.08)", color: "var(--error)",
+                        fontFamily: "var(--font-body)", fontSize: "12px", fontWeight: 500,
+                        cursor: "pointer", transition: "all 150ms ease",
+                      }}
+                    >
+                      Revoke
+                    </button>
+                  </>
+                )}
+              </div>
             </motion.div>
           ))}
         </div>

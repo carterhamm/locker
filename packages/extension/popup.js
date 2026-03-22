@@ -169,6 +169,29 @@ storeForm.addEventListener("submit", async (e) => {
     let data;
     try { data = await res.json(); } catch { data = {}; }
 
+    if (res.status === 409) {
+      // Key exists — offer to update
+      storeBtn.textContent = "Update existing key?";
+      storeBtn.classList.add("error-state");
+      storeBtn.disabled = false;
+      storeBtn.onclick = async () => {
+        storeBtn.textContent = "Updating...";
+        storeBtn.classList.remove("error-state");
+        storeBtn.disabled = true;
+        storeBtn.onclick = null;
+        // Delete then re-add
+        await fetch(`${API_URL}/keys/${encodeURIComponent(name)}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+        const r2 = await fetch(`${API_URL}/keys`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ service: name, key }) });
+        if (r2.ok) {
+          storeBtn.textContent = `\u2713 Updated: ${name}`;
+          storeBtn.classList.add("success-state");
+          serviceName.value = ""; apiKey.value = "";
+          setTimeout(() => window.close(), 1500);
+        } else { showBtnError("Update failed"); }
+      };
+      return;
+    }
+
     if (!res.ok) {
       const msg = data.error || "Failed";
       showBtnError(msg.length > 45 ? msg.slice(0, 45) + "…" : msg);

@@ -76,6 +76,25 @@ export default function SettingsPage() {
   const [passkeyState, setPasskeyState] = useState<"idle" | "registering" | "registered" | "has-passkey" | "error">("idle");
   const [passkeyError, setPasskeyError] = useState("");
   const [passkeyCount, setPasskeyCount] = useState(0);
+  const [fullName, setFullName] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [profileSaved, setProfileSaved] = useState(false);
+
+  // Load profile
+  useEffect(() => {
+    (async () => {
+      try {
+        const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+        if (!authToken) return;
+        const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${authToken}` } });
+        if (res.ok) {
+          const data = await res.json();
+          setFullName(data.user.fullName || "");
+          setBillingAddress(data.user.billingAddress || "");
+        }
+      } catch {}
+    })();
+  }, [token]);
 
   // Check if user already has passkeys
   useEffect(() => {
@@ -159,6 +178,42 @@ export default function SettingsPage() {
           Manage your account and preferences.
         </p>
       </div>
+
+      <SettingsCard title="Profile">
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Full Name</label>
+              <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); setProfileSaved(false); }} placeholder="Your name" autoComplete="name" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+            </div>
+          </div>
+          <div>
+            <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
+            <input type="text" value={billingAddress} onChange={(e) => { setBillingAddress(e.target.value); setProfileSaved(false); }} placeholder="123 Main St, City, State ZIP" autoComplete="street-address" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+          </div>
+          <button
+            onClick={async () => {
+              const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+              await fetch("/api/auth/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+                body: JSON.stringify({ fullName, billingAddress }),
+              });
+              setProfileSaved(true);
+              setTimeout(() => setProfileSaved(false), 3000);
+            }}
+            style={{
+              padding: "8px 20px", borderRadius: "8px", border: "none", alignSelf: "flex-start",
+              background: profileSaved ? "rgba(50,215,75,0.12)" : "#ffffff",
+              color: profileSaved ? "var(--success)" : "#000000",
+              fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer",
+              transition: "all 250ms ease",
+            }}
+          >
+            {profileSaved ? "✓ Saved" : "Save Profile"}
+          </button>
+        </div>
+      </SettingsCard>
 
       <SettingsCard title="Account">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
