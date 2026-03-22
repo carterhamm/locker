@@ -237,15 +237,17 @@ export default function AuthPage() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: "50%",
-          border: "1px solid var(--border-medium)",
+          border: "none",
           background: "var(--bg-glass)",
           backdropFilter: "blur(12px)",
           color: "var(--text-secondary)",
           cursor: "pointer",
           transition: "all 150ms ease",
+          overflow: "hidden",
         }}
         aria-label="Go back"
       >
+        <FadingBorder radius="50%" />
         <CloseIcon size={16} />
       </button>
 
