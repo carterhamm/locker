@@ -257,8 +257,8 @@ export default function LandingPage() {
           position: "relative",
         }}
       >
-        <div className="animate-in stagger-1" style={{ marginBottom: "28px", display: "flex", justifyContent: "center" }}>
-          <LockerLogo size={200} />
+        <div className="animate-in stagger-1" style={{ marginBottom: "32px", display: "flex", justifyContent: "center", width: "100%" }}>
+          <LockerLogo size={220} />
         </div>
 
         <div className="animate-in stagger-2">
@@ -427,7 +427,7 @@ export default function LandingPage() {
           <FeatureCard
             icon={({ hover }) => <AnimAuditLog hover={hover} />}
             title="Full Audit Trail"
-            description="Every retrieval logged with timestamp, user, and agent identifier. Know exactly who accessed what."
+            description="Every retrieval logged with timestamp, user, and agent identifier. Know exactly who accessed what and when."
             delay={80}
             glowColor="rgba(120,180,255,0.06)"
           />

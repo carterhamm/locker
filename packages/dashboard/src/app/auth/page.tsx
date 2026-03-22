@@ -255,23 +255,25 @@ export default function AuthPage() {
         <div className="orb" />
         <div className="orb" />
       </div>
-      {/* ── Close button (X) top-left ── */}
-      <button
-        onClick={() => (step === "email" ? router.push("/") : (setStep("email"), setPassword(""), setError("")))}
-        style={{
-          position: "fixed",
-          top: "16px",
-          left: "20px",
-          zIndex: 50,
-          width: "36px",
-          height: "36px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "50%",
-          border: "none",
-          background: "var(--bg-glass)",
-          backdropFilter: "blur(12px)",
+      {/* ── Top nav bar ── */}
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 20px",
+      }}>
+        {/* Left: X button */}
+        <button
+          onClick={() => (step === "email" ? router.push("/") : (setStep("email"), setPassword(""), setError("")))}
+          style={{
+            width: "36px",
+            height: "36px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+            border: "none",
+            background: "var(--bg-glass)",
+            backdropFilter: "blur(12px)",
           color: "var(--text-secondary)",
           cursor: "pointer",
           transition: "all 150ms ease",
@@ -279,22 +281,30 @@ export default function AuthPage() {
         }}
         aria-label="Go back"
       >
-        <FadingBorder radius="50%" />
-        <CloseIcon size={16} />
-      </button>
+          <FadingBorder radius="50%" />
+          <CloseIcon size={16} />
+        </button>
 
-      {/* ── GitHub link — right side, aligned to same edge as landing nav ── */}
-      <div
-        style={{
-          position: "fixed",
-          top: "16px",
-          right: "40px",
-          zIndex: 50,
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-        }}
-      >
+        {/* Center: Locker text */}
+        <Link href="/" style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "16px",
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          color: "var(--text-primary)",
+          textDecoration: "none",
+        }}>
+          Locker
+        </Link>
+
+        {/* Right: GitHub */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
         <a
           href="https://github.com/carterhamm"
           target="_blank"
@@ -323,37 +333,11 @@ export default function AuthPage() {
           </span>
           GitHub
         </a>
+        </div>
       </div>
 
       {/* ── Auth Card ── */}
       <div style={{ width: "100%", maxWidth: "400px" }}>
-        {/* Large logo above card */}
-        <div
-          className="animate-in stagger-1"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "32px",
-          }}
-        >
-          <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", textDecoration: "none", gap: "12px" }}>
-            <LockerLogo size={100} />
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "22px",
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                color: "var(--text-primary)",
-              }}
-            >
-              Locker
-            </span>
-          </Link>
-        </div>
-
         {/* Expanding card */}
         <div
           className="animate-in stagger-2"
@@ -370,6 +354,12 @@ export default function AuthPage() {
           }}
         >
           <FadingBorder radius="var(--radius-xl)" />
+
+          {/* Logo inside card */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+            <LockerLogo size={56} />
+          </div>
+
           {/* Title — changes based on step */}
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
             <h1
