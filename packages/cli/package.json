@@ -1,10 +1,11 @@
 {
   "name": "locker-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI for Locker — secure API credential manager for AI agents",
   "main": "dist/index.js",
   "bin": {
-    "locker": "dist/index.js"
+    "locker": "dist/index.js",
+    "locker-cli": "dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts",

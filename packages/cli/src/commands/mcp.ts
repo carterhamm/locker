@@ -13,16 +13,8 @@ const TARGETS: Record<string, string> = {
 };
 
 function getMcpEntry() {
-  // Resolve the actual path to the MCP server entry point
-  const mcpPkg = path.resolve(__dirname, "..", "..", "..", "mcp");
-  const mcpEntry = path.join(mcpPkg, "src", "index.ts");
-  const mcpDist = path.join(mcpPkg, "dist", "index.js");
-
-  // Prefer dist if built, otherwise use tsx with source
-  if (fs.existsSync(mcpDist)) {
-    return { command: "node", args: [mcpDist] };
-  }
-  return { command: "npx", args: ["tsx", mcpEntry] };
+  // Use the published npm package — npx resolves it globally
+  return { command: "npx", args: ["locker-mcp-server"] };
 }
 
 function installToTarget(name: string, configPath: string): boolean {

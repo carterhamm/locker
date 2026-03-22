@@ -1,5 +1,5 @@
 {
-  "name": "@locker/mcp",
+  "name": "locker-mcp-server",
   "version": "0.1.0",
   "description": "MCP server for Locker — lets AI agents retrieve API keys securely",
   "main": "dist/index.js",
