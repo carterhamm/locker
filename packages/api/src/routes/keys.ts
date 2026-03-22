@@ -54,15 +54,24 @@ keysRouter.post("/", async (req: Request, res: Response) => {
       return;
     }
 
+    const pool = getPool();
+
+    // Check if key already exists
+    const existing = await pool.query(
+      "SELECT id FROM keys WHERE user_id = $1 AND service_name = $2",
+      [userId, serviceName]
+    );
+    if (existing.rows.length > 0) {
+      res.status(409).json({ error: `Key for "${serviceName}" already exists. Revoke it first.` });
+      return;
+    }
+
     const userCEK = await getUserCEK(userId);
     const { ciphertext, iv } = encryptUserKey(key, userCEK);
 
-    const pool = getPool();
     await pool.query(
       `INSERT INTO keys (user_id, service_name, encrypted_value, iv)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (user_id, service_name)
-       DO UPDATE SET encrypted_value = $3, iv = $4, last_used = NULL`,
+       VALUES ($1, $2, $3, $4)`,
       [userId, serviceName, ciphertext, iv]
     );
 

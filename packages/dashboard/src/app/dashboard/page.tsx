@@ -57,17 +57,14 @@ export default function KeysPage() {
     if (isDemo) { setLoading(false); return; }
     if (pollFailedRef.current) return;
     try {
-      // Send both cookie and Bearer token for maximum compatibility
-      const storedToken = localStorage.getItem("locker-token");
-      const headers: Record<string, string> = {};
-      if (storedToken && !storedToken.startsWith("eyJkZW1v")) {
-        headers.Authorization = `Bearer ${storedToken}`;
-      } else if (token && token !== "cookie") {
-        headers.Authorization = `Bearer ${token}`;
+      // Use Bearer token directly — Next.js rewrites strip cookies
+      const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+      if (!authToken || authToken.startsWith("eyJkZW1v")) {
+        setLoading(false);
+        return;
       }
       const res = await fetch("/api/keys", {
-        headers,
-        credentials: "include",
+        headers: { Authorization: `Bearer ${authToken}` },
       });
       if (res.status === 401) {
         pollFailedRef.current = true;
@@ -107,12 +104,13 @@ export default function KeysPage() {
     }
 
     try {
-      const postHeaders: Record<string, string> = { "Content-Type": "application/json" };
-      if (token && token !== "cookie") postHeaders.Authorization = `Bearer ${token}`;
+      const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
       const res = await fetch("/api/keys", {
         method: "POST",
-        credentials: "include",
-        headers: postHeaders,
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
         body: JSON.stringify({ service: newService, key: newKey }),
       });
       if (res.ok) {
@@ -142,12 +140,10 @@ export default function KeysPage() {
     setError("");
     setSuccess("");
     try {
-      const delHeaders: Record<string, string> = {};
-      if (token && token !== "cookie") delHeaders.Authorization = `Bearer ${token}`;
+      const authToken2 = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
       const res = await fetch(`/api/keys/${encodeURIComponent(service)}`, {
         method: "DELETE",
-        headers: delHeaders,
-        credentials: "include",
+        headers: authToken2 ? { Authorization: `Bearer ${authToken2}` } : {},
       });
       if (res.ok) {
         setSuccess(`Key revoked for ${service}`);
