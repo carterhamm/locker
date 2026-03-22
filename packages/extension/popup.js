@@ -80,10 +80,11 @@ loginForm.addEventListener("submit", async (e) => {
       }),
     });
 
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
 
     if (!res.ok) {
-      loginError.textContent = data.error || "Authentication failed";
+      loginError.textContent = data.error || `Authentication failed (${res.status})`;
       loginError.classList.remove("hidden");
       return;
     }

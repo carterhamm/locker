@@ -534,7 +534,7 @@ export default function LandingPage() {
           {/* Brand */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-              <LockerLogo size={20} />
+              <LockerLogo size={24} />
               <span
                 style={{
                   fontFamily: "var(--font-display)",

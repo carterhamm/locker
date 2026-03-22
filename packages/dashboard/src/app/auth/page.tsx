@@ -357,7 +357,7 @@ export default function AuthPage() {
 
           {/* Logo inside card */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-            <LockerLogo size={56} />
+            <LockerLogo size={80} />
           </div>
 
           {/* Title — changes based on step */}
