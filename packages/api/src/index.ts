@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import { requireEnv } from "./config";
 import { authRouter } from "./routes/auth";
@@ -17,8 +18,23 @@ requireEnv("JWT_SECRET");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// [C1] CORS — explicit allowlist, not wildcard
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "").split(",").filter(Boolean);
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (CLI, MCP, server-to-server)
+    if (!origin) return cb(null, true);
+    if (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
+
+// [L5] Security headers
+app.use(helmet());
+
+// [L1] Explicit body size limit
+app.use(express.json({ limit: "10kb" }));
 
 // Global rate limit: 100 requests per 15 minutes per IP
 const globalLimiter = rateLimit({

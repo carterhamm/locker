@@ -34,8 +34,7 @@ logsRouter.get("/", async (req: Request, res: Response) => {
     }));
 
     res.json({ logs, limit, offset });
-  } catch (err) {
-    console.error("Get logs error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });

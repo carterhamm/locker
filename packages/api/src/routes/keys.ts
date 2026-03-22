@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { getPool } from "../db/client";
+import { isValidServiceName } from "./auth";
 import {
   decryptWithMasterKey,
   encryptUserKey,
@@ -8,9 +9,6 @@ import {
 
 export const keysRouter = Router();
 
-/**
- * Retrieves and decrypts the user's CEK from the database.
- */
 async function getUserCEK(userId: string): Promise<string> {
   const pool = getPool();
   const result = await pool.query(
@@ -24,10 +22,14 @@ async function getUserCEK(userId: string): Promise<string> {
   return decryptWithMasterKey(encrypted_cek, cek_iv);
 }
 
+// [M7] No-cache headers for key responses
+function setNoCacheHeaders(res: Response) {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.set("Pragma", "no-cache");
+}
+
 /**
  * POST /keys
- * Body: { service, key, agentIdentifier? }
- * Encrypts and stores an API key for the authenticated user.
  */
 keysRouter.post("/", async (req: Request, res: Response) => {
   try {
@@ -46,15 +48,16 @@ keysRouter.post("/", async (req: Request, res: Response) => {
 
     const serviceName = service.toLowerCase().trim();
 
-    // Get user's CEK
-    const userCEK = await getUserCEK(userId);
+    // [M3] Validate service name
+    if (!isValidServiceName(serviceName)) {
+      res.status(400).json({ error: "Service name must be 1-100 chars, alphanumeric with .-_ only" });
+      return;
+    }
 
-    // Encrypt the API key with the user's CEK
+    const userCEK = await getUserCEK(userId);
     const { ciphertext, iv } = encryptUserKey(key, userCEK);
 
     const pool = getPool();
-
-    // Upsert — update if service already exists for this user
     await pool.query(
       `INSERT INTO keys (user_id, service_name, encrypted_value, iv)
        VALUES ($1, $2, $3, $4)
@@ -64,15 +67,13 @@ keysRouter.post("/", async (req: Request, res: Response) => {
     );
 
     res.status(201).json({ service: serviceName, message: "Key stored" });
-  } catch (err) {
-    console.error("Store key error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
  * GET /keys
- * Lists all stored service names for the authenticated user (never key values).
  */
 keysRouter.get("/", async (req: Request, res: Response) => {
   try {
@@ -93,15 +94,14 @@ keysRouter.get("/", async (req: Request, res: Response) => {
     }));
 
     res.json({ services });
-  } catch (err) {
-    console.error("List keys error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
  * GET /keys/:service
- * Retrieves and decrypts a specific API key. Logs the access.
+ * [H5/M7] Cache-control headers on key retrieval
  */
 keysRouter.get("/:service", async (req: Request, res: Response) => {
   try {
@@ -111,7 +111,6 @@ keysRouter.get("/:service", async (req: Request, res: Response) => {
 
     const pool = getPool();
 
-    // Fetch the encrypted key
     const result = await pool.query(
       `SELECT id, encrypted_value, iv FROM keys
        WHERE user_id = $1 AND service_name = $2`,
@@ -125,33 +124,29 @@ keysRouter.get("/:service", async (req: Request, res: Response) => {
 
     const { id: keyId, encrypted_value, iv } = result.rows[0];
 
-    // Decrypt
     const userCEK = await getUserCEK(userId);
     const plainKey = decryptUserKey(encrypted_value, iv, userCEK);
 
-    // Log the access — no exceptions
     await pool.query(
       `INSERT INTO access_logs (key_id, user_id, agent_identifier)
        VALUES ($1, $2, $3)`,
       [keyId, userId, agentIdentifier]
     );
 
-    // Update last_used
     await pool.query(
       "UPDATE keys SET last_used = now() WHERE id = $1",
       [keyId]
     );
 
+    setNoCacheHeaders(res);
     res.json({ service: serviceName, key: plainKey });
-  } catch (err) {
-    console.error("Get key error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
  * DELETE /keys/:service
- * Deletes a stored key for the authenticated user.
  */
 keysRouter.delete("/:service", async (req: Request, res: Response) => {
   try {
@@ -170,8 +165,7 @@ keysRouter.delete("/:service", async (req: Request, res: Response) => {
     }
 
     res.json({ service: serviceName, message: "Key revoked" });
-  } catch (err) {
-    console.error("Delete key error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -5,10 +5,10 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: locker
-      POSTGRES_PASSWORD: locker
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-locker_dev_only_change_me}
       POSTGRES_DB: locker
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"  # Bind to localhost only
     volumes:
       - pgdata:/var/lib/postgresql/data
 

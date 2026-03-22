@@ -41,8 +41,9 @@ program
   .action(getCommand);
 
 program
-  .command("set <service> <key>")
-  .description("Store an API key")
+  .command("set <service> [key]")
+  .description("Store an API key (prompts if key not provided)")
+  .option("--stdin", "Read key from stdin")
   .action(setCommand);
 
 program

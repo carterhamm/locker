@@ -1,6 +1,12 @@
 import { LockerConfig } from "./config";
 
-const DEFAULT_API_URL = "http://localhost:3001";
+const DEFAULT_API_URL = "https://api-production-449f.up.railway.app";
+
+function warnIfInsecure(url: string) {
+  if (url.startsWith("http://") && !url.includes("localhost") && !url.includes("127.0.0.1")) {
+    console.error("WARNING: Connecting over HTTP to a remote server. Your tokens and keys are NOT encrypted in transit.");
+  }
+}
 
 export interface ApiResponse<T = any> {
   ok: boolean;
@@ -19,6 +25,7 @@ export async function apiRequest<T = any>(
   body?: Record<string, any>,
   headers?: Record<string, string>
 ): Promise<ApiResponse<T>> {
+  warnIfInsecure(config.apiUrl);
   const url = `${config.apiUrl}${path}`;
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",

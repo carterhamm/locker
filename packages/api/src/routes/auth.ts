@@ -11,10 +11,10 @@ import {
 
 export const authRouter = Router();
 
-// Stricter rate limit on auth routes (20 per 15 min)
+// [M1] Stricter rate limit on auth (10 per 15 min per IP)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many auth attempts, please try again later" },
@@ -24,10 +24,28 @@ authRouter.use(authLimiter);
 const SALT_ROUNDS = 12;
 const JWT_EXPIRY = "24h";
 
+// [M2] Email validation
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(email: string): boolean {
+  return EMAIL_RE.test(email) && email.length <= 254;
+}
+
+// [M5] Password complexity
+function isStrongPassword(password: string): string | null {
+  if (password.length < 8) return "Password must be at least 8 characters";
+  if (!/[A-Z]/.test(password)) return "Password must contain an uppercase letter";
+  if (!/[a-z]/.test(password)) return "Password must contain a lowercase letter";
+  if (!/[0-9]/.test(password)) return "Password must contain a number";
+  return null;
+}
+
+// [M3] Service name validation (exported for use in keys.ts)
+export function isValidServiceName(name: string): boolean {
+  return /^[a-z0-9][a-z0-9._-]{0,99}$/.test(name);
+}
+
 /**
  * POST /auth/register
- * Body: { email, password }
- * Creates user with encrypted CEK, returns JWT.
  */
 authRouter.post("/register", async (req: Request, res: Response) => {
   try {
@@ -43,14 +61,21 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       return;
     }
 
-    if (password.length < 8) {
-      res.status(400).json({ error: "Password must be at least 8 characters" });
+    // [M2] Validate email format
+    if (!isValidEmail(email)) {
+      res.status(400).json({ error: "Invalid email format" });
+      return;
+    }
+
+    // [M5] Password complexity
+    const pwError = isStrongPassword(password);
+    if (pwError) {
+      res.status(400).json({ error: pwError });
       return;
     }
 
     const pool = getPool();
 
-    // Check if user exists
     const existing = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [email.toLowerCase()]
@@ -60,15 +85,12 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       return;
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Generate and encrypt a CEK for this user
     const plainCEK = generateUserCEK();
     const { ciphertext: encryptedCEK, iv: cekIV } =
       encryptWithMasterKey(plainCEK);
 
-    // Insert user
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, encrypted_cek, cek_iv)
        VALUES ($1, $2, $3, $4)
@@ -78,25 +100,22 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 
     const user = result.rows[0];
 
-    // Issue JWT
     const secret = requireEnv("JWT_SECRET");
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       secret,
-      { expiresIn: JWT_EXPIRY }
+      { expiresIn: JWT_EXPIRY, algorithm: "HS256" }
     );
 
     res.status(201).json({ token, user: { id: user.id, email: user.email } });
-  } catch (err) {
-    console.error("Registration error:", err);
+  } catch {
+    // [M4] Don't log full error objects
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
  * POST /auth/login
- * Body: { email, password }
- * Returns JWT on success.
  */
 authRouter.post("/login", async (req: Request, res: Response) => {
   try {
@@ -129,33 +148,24 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       secret,
-      { expiresIn: JWT_EXPIRY }
+      { expiresIn: JWT_EXPIRY, algorithm: "HS256" }
     );
 
     res.json({ token, user: { id: user.id, email: user.email } });
-  } catch (err) {
-    console.error("Login error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
  * POST /auth/check-email
- * Body: { email }
- * Returns whether an account exists for this email.
- * Used by the Continuity auth flow.
+ * [C2] Removed hardcoded demo account backdoor
  */
 authRouter.post("/check-email", async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     if (!email || typeof email !== "string") {
       res.status(400).json({ error: "Email is required" });
-      return;
-    }
-
-    // Demo test account — always respond as existing
-    if (email.toLowerCase() === "a@b.c") {
-      res.json({ exists: true });
       return;
     }
 
@@ -166,16 +176,13 @@ authRouter.post("/check-email", async (req: Request, res: Response) => {
     );
 
     res.json({ exists: result.rows.length > 0 });
-  } catch (err) {
-    console.error("Check email error:", err);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
  * POST /auth/logout
- * Client-side logout — JWT is stateless, so just acknowledge.
- * Client should discard the token.
  */
 authRouter.post("/logout", (_req: Request, res: Response) => {
   res.json({ message: "Logged out. Discard your token." });

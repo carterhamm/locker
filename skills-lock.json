@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "skills": {
+    "apple-bento-grid": {
+      "source": "hubeiqiao/apple-bento-grid",
+      "sourceType": "github",
+      "computedHash": "813841b2b8b20418a5980c9d878c3d388ae098e23ae9aa309e0863bf2e08deb1"
+    },
+    "apple-hig-designer": {
+      "source": "jamesrochabrun/skills",
+      "sourceType": "github",
+      "computedHash": "d6f35edf97a7545d967e4d5bbb5666712d732c9e40328835d8f3f585ae416f0a"
+    },
+    "design-md": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "computedHash": "d3a4c7d2f2715a33662c8b06ffc16035d01965a8b4ed81c2958fb22ae94760f8"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "computedHash": "d31e234f0c90694a670222cdd1dafa853e051d7066beda389f1097c22dadd461"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "high-end-visual-design": {
+      "source": "leonxlnx/taste-skill",
+      "sourceType": "github",
+      "computedHash": "7db385e4c5370e5a7fca9704a1361b056e4504ea6a03924bb86f33a4f00b5c73"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+    }
+  }
+}

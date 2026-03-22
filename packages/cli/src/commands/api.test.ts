@@ -133,7 +133,7 @@ describe("getDefaultApiUrl", () => {
 
   it("returns default URL when env var is not set", () => {
     delete process.env.LOCKER_API_URL;
-    expect(getDefaultApiUrl()).toBe("http://localhost:3001");
+    expect(getDefaultApiUrl()).toBe("https://api-production-449f.up.railway.app");
   });
 
   it("returns env var when set", () => {
