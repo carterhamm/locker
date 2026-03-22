@@ -54,8 +54,10 @@ export default function KeysPage() {
   async function fetchKeys() {
     if (isDemo) { setLoading(false); return; }
     try {
+      // Try cookie auth first, fall back to stored token
+      const storedToken = token !== "cookie" ? token : localStorage.getItem("locker-token");
       const headers: Record<string, string> = {};
-      if (token && token !== "cookie") headers.Authorization = `Bearer ${token}`;
+      if (storedToken) headers.Authorization = `Bearer ${storedToken}`;
       const res = await fetch("/api/keys", {
         headers,
         credentials: "include",
