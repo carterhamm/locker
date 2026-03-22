@@ -109,8 +109,7 @@ storeForm.addEventListener("submit", async (e) => {
   storeError.classList.add("hidden");
   storeBtn.disabled = true;
   storeBtn.textContent = "Storing...";
-  storeBtn.style.background = "#ffffff";
-  storeBtn.style.color = "#000000";
+  storeBtn.classList.remove("success-state");
 
   const name = serviceName.value.trim().toLowerCase();
   const key = apiKey.value;
@@ -152,9 +151,8 @@ storeForm.addEventListener("submit", async (e) => {
     }
 
     // Show success on the button itself
-    storeBtn.textContent = `Stored: ${name}`;
-    storeBtn.style.background = "#32d74b";
-    storeBtn.style.color = "#000000";
+    storeBtn.textContent = `\u2713 Stored: ${name}`;
+    storeBtn.classList.add("success-state");
     storeBtn.disabled = true;
     serviceName.value = "";
     apiKey.value = "";
@@ -165,11 +163,10 @@ storeForm.addEventListener("submit", async (e) => {
     storeError.classList.remove("hidden");
   } finally {
     // Only reset if not in success state
-    if (!storeBtn.textContent.startsWith("Stored")) {
+    if (!storeBtn.classList.contains("success-state")) {
       storeBtn.disabled = false;
       storeBtn.textContent = "Store Key";
-      storeBtn.style.background = "#ffffff";
-      storeBtn.style.color = "#000000";
+      storeBtn.classList.remove("success-state");
     }
   }
 });

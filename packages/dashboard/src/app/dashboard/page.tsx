@@ -54,9 +54,11 @@ export default function KeysPage() {
   async function fetchKeys() {
     if (isDemo) { setLoading(false); return; }
     try {
+      const headers: Record<string, string> = {};
+      if (token && token !== "cookie") headers.Authorization = `Bearer ${token}`;
       const res = await fetch("/api/keys", {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include" as RequestCredentials,
+        headers,
+        credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
@@ -85,13 +87,12 @@ export default function KeysPage() {
     setError("");
     setSuccess("");
     try {
+      const postHeaders: Record<string, string> = { "Content-Type": "application/json" };
+      if (token && token !== "cookie") postHeaders.Authorization = `Bearer ${token}`;
       const res = await fetch("/api/keys", {
         method: "POST",
         credentials: "include",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: postHeaders,
         body: JSON.stringify({ service: newService, key: newKey }),
       });
       if (res.ok) {
@@ -121,10 +122,12 @@ export default function KeysPage() {
     setError("");
     setSuccess("");
     try {
+      const delHeaders: Record<string, string> = {};
+      if (token && token !== "cookie") delHeaders.Authorization = `Bearer ${token}`;
       const res = await fetch(`/api/keys/${encodeURIComponent(service)}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include" as RequestCredentials,
+        headers: delHeaders,
+        credentials: "include",
       });
       if (res.ok) {
         setSuccess(`Key revoked for ${service}`);
