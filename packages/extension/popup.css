@@ -7,9 +7,12 @@
   padding: 0;
 }
 
-body {
+html, body {
   width: 320px;
   min-height: 200px;
+}
+
+body {
   background: #000000;
   color: #ffffff;
   font-family: 'DM Sans', system-ui, sans-serif;

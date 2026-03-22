@@ -1,6 +1,6 @@
 const API_URL = "https://api-production-449f.up.railway.app";
 
-// DOM elements
+// DOM
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
@@ -9,6 +9,8 @@ const loginEmail = document.getElementById("login-email");
 const loginPassword = document.getElementById("login-password");
 const loginError = document.getElementById("login-error");
 const loginBtn = document.getElementById("login-btn");
+const loginSubtitle = document.getElementById("login-subtitle");
+const toggleMode = document.getElementById("toggle-mode");
 const serviceName = document.getElementById("service-name");
 const apiKey = document.getElementById("api-key");
 const storeError = document.getElementById("store-error");
@@ -17,11 +19,10 @@ const storeBtn = document.getElementById("store-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const userInfo = document.getElementById("user-info");
 
-// State
 let token = null;
 let email = null;
+let isRegisterMode = false;
 
-// Init — check if already logged in
 async function init() {
   const stored = await chrome.storage.local.get(["locker_token", "locker_email"]);
   if (stored.locker_token && stored.locker_email) {
@@ -46,21 +47,31 @@ function showMainView() {
   storeError.classList.add("hidden");
   storeSuccess.classList.add("hidden");
   userInfo.textContent = email;
-  // Clear fields and focus service name
   serviceName.value = "";
   apiKey.value = "";
   setTimeout(() => serviceName.focus(), 50);
 }
 
-// Login
+// Toggle login ↔ register
+toggleMode.addEventListener("click", () => {
+  isRegisterMode = !isRegisterMode;
+  loginBtn.textContent = isRegisterMode ? "Create Account" : "Sign In";
+  loginSubtitle.textContent = isRegisterMode ? "Create an account to store keys" : "Sign in to store keys";
+  toggleMode.textContent = isRegisterMode ? "Already have an account?" : "Create an account";
+  loginError.classList.add("hidden");
+});
+
+// Login / Register
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.classList.add("hidden");
   loginBtn.disabled = true;
-  loginBtn.textContent = "Signing in...";
+  loginBtn.textContent = isRegisterMode ? "Creating..." : "Signing in...";
+
+  const endpoint = isRegisterMode ? "/auth/register" : "/auth/login";
 
   try {
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await fetch(`${API_URL}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -72,7 +83,7 @@ loginForm.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (!res.ok) {
-      loginError.textContent = data.error || "Login failed";
+      loginError.textContent = data.error || "Authentication failed";
       loginError.classList.remove("hidden");
       return;
     }
@@ -80,18 +91,14 @@ loginForm.addEventListener("submit", async (e) => {
     token = data.token;
     email = data.user.email;
 
-    await chrome.storage.local.set({
-      locker_token: token,
-      locker_email: email,
-    });
-
+    await chrome.storage.local.set({ locker_token: token, locker_email: email });
     showMainView();
-  } catch (err) {
+  } catch {
     loginError.textContent = "Cannot connect to Locker API";
     loginError.classList.remove("hidden");
   } finally {
     loginBtn.disabled = false;
-    loginBtn.textContent = "Sign In";
+    loginBtn.textContent = isRegisterMode ? "Create Account" : "Sign In";
   }
 });
 
@@ -125,7 +132,6 @@ storeForm.addEventListener("submit", async (e) => {
     });
 
     if (res.status === 401) {
-      // Token expired — force re-login
       await chrome.storage.local.remove(["locker_token", "locker_email"]);
       token = null;
       email = null;
@@ -143,14 +149,12 @@ storeForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    storeSuccess.textContent = `Key stored for ${name}`;
+    storeSuccess.textContent = `Stored: ${name}`;
     storeSuccess.classList.remove("hidden");
     serviceName.value = "";
     apiKey.value = "";
-
-    // Auto-close after 1.5s
     setTimeout(() => window.close(), 1500);
-  } catch (err) {
+  } catch {
     storeError.textContent = "Cannot connect to Locker API";
     storeError.classList.remove("hidden");
   } finally {
@@ -161,13 +165,18 @@ storeForm.addEventListener("submit", async (e) => {
 
 // Logout
 logoutBtn.addEventListener("click", async () => {
+  try {
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {}
   await chrome.storage.local.remove(["locker_token", "locker_email"]);
   token = null;
   email = null;
   showLoginView();
 });
 
-// Keyboard shortcut: Esc closes popup
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") window.close();
 });
