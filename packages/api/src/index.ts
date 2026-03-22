@@ -7,6 +7,7 @@ import { authRouter } from "./routes/auth";
 import { keysRouter } from "./routes/keys";
 import { logsRouter } from "./routes/logs";
 import { healthRouter } from "./routes/health";
+import { passkeysRouter } from "./routes/passkeys";
 import { authenticate } from "./middleware/auth";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -49,6 +50,7 @@ app.use(globalLimiter);
 // Public routes
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
+app.use("/passkeys", passkeysRouter);
 
 // Protected routes — JWT required
 app.use("/keys", authenticate, keysRouter);

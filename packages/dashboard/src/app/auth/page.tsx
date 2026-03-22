@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { LockerLogo, CloseIcon, PasskeyIcon } from "@/components/Icons";
 import { FadingBorder } from "@/components/FadingBorder";
+import { startAuthentication } from "@simplewebauthn/browser";
 import Link from "next/link";
 
 /* ── Test account credentials (works without backend) ── */
@@ -178,18 +179,49 @@ export default function AuthPage() {
 
   async function handlePasskeyAuth() {
     setError("");
+    setLoading(true);
     try {
-      // For passkey, we'd normally call navigator.credentials.get()
-      // with a challenge from the server. For now, show that it's wired up.
-      if (!window.PublicKeyCredential) {
-        setError("Passkeys not supported in this browser");
+      // Get authentication options from server
+      const optRes = await fetch("/api/passkeys/authenticate/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!optRes.ok) {
+        const data = await optRes.json();
+        setError(data.error || "No passkeys registered for this account");
         return;
       }
 
-      // This would be replaced with a real server challenge
-      setError("Passkey authentication requires a registered passkey. Use password for now.");
-    } catch {
-      setError("Passkey authentication failed");
+      const options = await optRes.json();
+
+      // Prompt the user's authenticator
+      const authResponse = await startAuthentication({ optionsJSON: options });
+
+      // Verify with server
+      const verifyRes = await fetch("/api/passkeys/authenticate/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ response: authResponse, userId: options.userId }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        setError(verifyData.error || "Passkey verification failed");
+        return;
+      }
+
+      login(verifyData.token, verifyData.user);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setError("Passkey authentication was cancelled");
+      } else {
+        setError("Passkey authentication failed");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -307,7 +339,7 @@ export default function AuthPage() {
           }}
         >
           <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", textDecoration: "none", gap: "12px" }}>
-            <LockerLogo size={72} />
+            <LockerLogo size={100} />
             <span
               style={{
                 fontFamily: "var(--font-display)",

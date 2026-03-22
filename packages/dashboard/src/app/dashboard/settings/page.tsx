@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { FadingBorder } from "@/components/FadingBorder";
+import { startRegistration } from "@simplewebauthn/browser";
 
 function CopyLine({ command, comment }: { command: string; comment: string }) {
   const [copied, setCopied] = useState(false);
@@ -71,7 +72,61 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
 }
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [passkeyStatus, setPasskeyStatus] = useState<string | null>(null);
+  const [passkeyError, setPasskeyError] = useState<string | null>(null);
+
+  async function handleRegisterPasskey() {
+    setPasskeyStatus(null);
+    setPasskeyError(null);
+
+    try {
+      // Get registration options
+      const optRes = await fetch("/api/passkeys/register/options", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && token !== "cookie" ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!optRes.ok) {
+        setPasskeyError("Failed to get registration options");
+        return;
+      }
+
+      const options = await optRes.json();
+
+      // Prompt the authenticator
+      const regResponse = await startRegistration({ optionsJSON: options });
+
+      // Verify with server
+      const verifyRes = await fetch("/api/passkeys/register/verify", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && token !== "cookie" ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(regResponse),
+      });
+
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json();
+        setPasskeyError(data.error || "Registration failed");
+        return;
+      }
+
+      setPasskeyStatus("Passkey registered successfully");
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setPasskeyError("Registration was cancelled");
+      } else {
+        setPasskeyError("Passkey registration failed");
+      }
+    }
+  }
 
   return (
     <div>
@@ -108,6 +163,45 @@ export default function SettingsPage() {
             Free Plan
           </div>
         </div>
+      </SettingsCard>
+
+      <SettingsCard title="Passkeys">
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ fontSize: "14px", fontFamily: "var(--font-body)", fontWeight: 500, marginBottom: "4px" }}>
+            Passwordless sign-in
+          </div>
+          <div style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+            Register a passkey to sign in with Face ID, Touch ID, or your security key.
+          </div>
+        </div>
+
+        {passkeyStatus && (
+          <div style={{ padding: "8px 14px", borderRadius: "8px", background: "rgba(50,215,75,0.08)", color: "var(--success)", fontSize: "12px", marginBottom: "12px" }}>
+            {passkeyStatus}
+          </div>
+        )}
+        {passkeyError && (
+          <div style={{ padding: "8px 14px", borderRadius: "8px", background: "rgba(239,68,68,0.08)", color: "var(--error)", fontSize: "12px", marginBottom: "12px" }}>
+            {passkeyError}
+          </div>
+        )}
+
+        <button
+          onClick={handleRegisterPasskey}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "10px",
+            border: "none",
+            background: "#ffffff",
+            color: "#000000",
+            fontFamily: "var(--font-body)",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Register Passkey
+        </button>
       </SettingsCard>
 
       <SettingsCard title="CLI Quick Start">

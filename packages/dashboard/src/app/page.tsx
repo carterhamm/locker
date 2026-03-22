@@ -257,8 +257,8 @@ export default function LandingPage() {
           position: "relative",
         }}
       >
-        <div className="animate-in stagger-1" style={{ marginBottom: "28px" }}>
-          <LockerLogo size={80} />
+        <div className="animate-in stagger-1" style={{ marginBottom: "28px", display: "flex", justifyContent: "center" }}>
+          <LockerLogo size={200} />
         </div>
 
         <div className="animate-in stagger-2">
