@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/components/AuthProvider";
 import { FadingBorder } from "@/components/FadingBorder";
@@ -51,17 +51,28 @@ export default function KeysPage() {
 
   const isDemo = token?.startsWith("eyJkZW1vIjp0cnVlfQ");
 
+  const pollFailedRef = useRef(false);
+
   async function fetchKeys() {
     if (isDemo) { setLoading(false); return; }
+    if (pollFailedRef.current) return;
     try {
-      // Try cookie auth first, fall back to stored token
-      const storedToken = token !== "cookie" ? token : localStorage.getItem("locker-token");
+      // Send both cookie and Bearer token for maximum compatibility
+      const storedToken = localStorage.getItem("locker-token");
       const headers: Record<string, string> = {};
-      if (storedToken) headers.Authorization = `Bearer ${storedToken}`;
+      if (storedToken && !storedToken.startsWith("eyJkZW1v")) {
+        headers.Authorization = `Bearer ${storedToken}`;
+      } else if (token && token !== "cookie") {
+        headers.Authorization = `Bearer ${token}`;
+      }
       const res = await fetch("/api/keys", {
         headers,
         credentials: "include",
       });
+      if (res.status === 401) {
+        pollFailedRef.current = true;
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setKeys(data.services || []);
@@ -88,6 +99,13 @@ export default function KeysPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    const serviceName = newService.toLowerCase().trim();
+    if (keys.some((k) => k.service === serviceName)) {
+      setError(`"${serviceName}" already exists. Revoke it first to update.`);
+      return;
+    }
+
     try {
       const postHeaders: Record<string, string> = { "Content-Type": "application/json" };
       if (token && token !== "cookie") postHeaders.Authorization = `Bearer ${token}`;
@@ -260,8 +278,11 @@ export default function KeysPage() {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             style={{ overflow: "hidden", marginBottom: "24px" }}
             onSubmit={handleAdd}
-            autoComplete="off"
+            autoComplete="locker-no-autofill"
           >
+            {/* Hidden fields to prevent browser password autofill */}
+            <input type="text" name="prevent-autofill-1" style={{display: "none"}} tabIndex={-1} />
+            <input type="password" name="prevent-autofill-2" style={{display: "none"}} tabIndex={-1} />
             <div
               style={{
                 padding: "24px",
@@ -277,13 +298,13 @@ export default function KeysPage() {
                   <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                     Service
                   </label>
-                  <input type="text" value={newService} onChange={(e) => setNewService(e.target.value)} required placeholder="openai" style={inputStyle} />
+                  <input type="text" value={newService} onChange={(e) => setNewService(e.target.value)} required placeholder="openai" autoComplete="off" data-1p-ignore data-lpignore="true" style={inputStyle} />
                 </div>
                 <div style={{ flex: "2 1 300px" }}>
                   <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                     API Key
                   </label>
-                  <input type="text" value={newKey} onChange={(e) => setNewKey(e.target.value)} required placeholder="sk-..." autoComplete="off" data-1p-ignore data-lpignore="true" style={{...inputStyle, WebkitTextSecurity: "disc" as any}} />
+                  <input type="text" value={newKey} onChange={(e) => setNewKey(e.target.value)} required placeholder="sk-..." autoComplete="off" data-1p-ignore data-lpignore="true" style={{...inputStyle, ...({WebkitTextSecurity: "disc"} as React.CSSProperties)}} />
                 </div>
                 <button
                   type="submit"
