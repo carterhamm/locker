@@ -46,8 +46,14 @@ export default function KeysPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [newService, setNewService] = useState("");
   const [newKey, setNewKey] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [alert, setAlert] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showAlert(msg: string, type: "success" | "error") {
+    if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    setAlert({ msg, type });
+    alertTimerRef.current = setTimeout(() => setAlert(null), 3000);
+  }
 
   const isDemo = token?.startsWith("eyJkZW1vIjp0cnVlfQ");
 
@@ -94,12 +100,11 @@ export default function KeysPage() {
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setAlert(null);
 
     const serviceName = newService.toLowerCase().trim();
     if (keys.some((k) => k.service === serviceName)) {
-      setError(`"${serviceName}" already exists. Revoke it first to update.`);
+      showAlert(`"${serviceName}" already exists`, "error");
       return;
     }
 
@@ -114,31 +119,31 @@ export default function KeysPage() {
         body: JSON.stringify({ service: newService, key: newKey }),
       });
       if (res.ok) {
-        setSuccess(`Key stored for ${newService}`);
+        showAlert(`Stored: ${newService}`, "success");
         setNewService("");
         setNewKey("");
         setShowAdd(false);
         fetchKeys();
       } else {
         const data = await res.json();
-        setError(data.error || "Failed to store key");
+        const msg = data.error || "Failed";
+        showAlert(msg.length > 30 ? msg.slice(0, 30) + "…" : msg, "error");
       }
     } catch {
       if (isDemo) {
         setKeys(prev => [...prev, { service: newService.toLowerCase().trim(), createdAt: new Date().toISOString(), lastUsed: null }]);
-        setSuccess(`Key stored for ${newService}`);
+        showAlert(`Stored: ${newService}`, "success");
         setNewService("");
         setNewKey("");
         setShowAdd(false);
       } else {
-        setError("Cannot connect to API. Is the server running?");
+        showAlert("Cannot connect to API", "error");
       }
     }
   }
 
   async function handleRevoke(service: string) {
-    setError("");
-    setSuccess("");
+    setAlert(null);
     try {
       const authToken2 = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
       const res = await fetch(`/api/keys/${encodeURIComponent(service)}`, {
@@ -146,11 +151,11 @@ export default function KeysPage() {
         headers: authToken2 ? { Authorization: `Bearer ${authToken2}` } : {},
       });
       if (res.ok) {
-        setSuccess(`Key revoked for ${service}`);
+        showAlert(`Revoked: ${service}`, "success");
         fetchKeys();
       }
     } catch {
-      setError("Failed to revoke key");
+      showAlert("Revoke failed", "error");
     }
   }
 
@@ -203,8 +208,9 @@ export default function KeysPage() {
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <AnimatePresence>
-            {success && (
+            {alert && (
               <motion.div
+                key={alert.msg}
                 initial={{ opacity: 0, scale: 0.9, x: 10 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.9, x: 10 }}
@@ -212,35 +218,15 @@ export default function KeysPage() {
                 style={{
                   padding: "6px 14px",
                   borderRadius: "100px",
-                  background: "rgba(50,215,75,0.1)",
-                  color: "var(--success)",
-                  fontSize: "12px",
+                  background: alert.type === "success" ? "rgba(50,215,75,0.1)" : "rgba(239,68,68,0.1)",
+                  color: alert.type === "success" ? "var(--success)" : "var(--error)",
+                  fontSize: alert.msg.length > 20 ? "11px" : "12px",
                   fontWeight: 500,
                   fontFamily: "var(--font-body)",
                   whiteSpace: "nowrap",
                 }}
               >
-                {success}
-              </motion.div>
-            )}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, x: 10 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.9, x: 10 }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: "100px",
-                  background: "rgba(239,68,68,0.1)",
-                  color: "var(--error)",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  fontFamily: "var(--font-body)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {error}
+                {alert.type === "success" ? "✓ " : ""}{alert.msg}
               </motion.div>
             )}
           </AnimatePresence>
