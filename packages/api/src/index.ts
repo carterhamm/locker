@@ -23,10 +23,11 @@ const app = express();
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "").split(",").filter(Boolean);
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (CLI, MCP, server-to-server)
+    // Allow: no origin (CLI, MCP), chrome extensions, allowed origins
     if (!origin) return cb(null, true);
+    if (origin.startsWith("chrome-extension://")) return cb(null, true);
     if (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    cb(new Error("Not allowed by CORS"));
+    cb(null, false); // Reject without crashing
   },
   credentials: true,
 }));
