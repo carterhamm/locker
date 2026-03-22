@@ -62,7 +62,7 @@ keysRouter.post("/", async (req: Request, res: Response) => {
       [userId, serviceName]
     );
     if (existing.rows.length > 0) {
-      res.status(409).json({ error: `Key for "${serviceName}" already exists. Revoke it first.` });
+      res.status(409).json({ error: `"${serviceName}" already exists` });
       return;
     }
 
