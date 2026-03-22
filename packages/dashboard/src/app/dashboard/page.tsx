@@ -92,6 +92,18 @@ export default function KeysPage() {
     if (token) fetchKeys();
   }, [token]);
 
+  // Esc cancels Add Key mode
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && showAdd) {
+        setShowAdd(false);
+        setAlert(null);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showAdd]);
+
   // Live refresh — poll every 5 seconds for new keys
   useEffect(() => {
     if (!token || isDemo) return;

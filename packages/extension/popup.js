@@ -157,7 +157,7 @@ storeForm.addEventListener("submit", async (e) => {
 
     if (!res.ok) {
       const msg = data.error || "Failed";
-      showBtnError(msg.length > 28 ? msg.slice(0, 28) + "…" : msg);
+      showBtnError(msg.length > 45 ? msg.slice(0, 45) + "…" : msg);
       return;
     }
 
