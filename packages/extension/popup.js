@@ -14,7 +14,6 @@ const toggleMode = document.getElementById("toggle-mode");
 const serviceName = document.getElementById("service-name");
 const apiKey = document.getElementById("api-key");
 const storeError = document.getElementById("store-error");
-const storeSuccess = document.getElementById("store-success");
 const storeBtn = document.getElementById("store-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const userInfo = document.getElementById("user-info");
@@ -45,7 +44,6 @@ function showMainView() {
   loginView.classList.add("hidden");
   mainView.classList.remove("hidden");
   storeError.classList.add("hidden");
-  storeSuccess.classList.add("hidden");
   userInfo.textContent = email;
   serviceName.value = "";
   apiKey.value = "";
