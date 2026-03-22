@@ -1,0 +1,9 @@
+{
+  "skills": [
+    {
+      "name": "locker",
+      "description": "Use Locker to retrieve API keys securely instead of hardcoding them. Teaches agents to use locker get <service> or the MCP tool.",
+      "path": "skills/locker"
+    }
+  ]
+}
