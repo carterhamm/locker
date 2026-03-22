@@ -56,6 +56,7 @@ export default function KeysPage() {
     try {
       const res = await fetch("/api/keys", {
         headers: { Authorization: `Bearer ${token}` },
+        credentials: "include" as RequestCredentials,
       });
       if (res.ok) {
         const data = await res.json();
@@ -79,6 +80,7 @@ export default function KeysPage() {
     try {
       const res = await fetch("/api/keys", {
         method: "POST",
+        credentials: "include",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -115,6 +117,7 @@ export default function KeysPage() {
       const res = await fetch(`/api/keys/${encodeURIComponent(service)}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
+        credentials: "include" as RequestCredentials,
       });
       if (res.ok) {
         setSuccess(`Key revoked for ${service}`);

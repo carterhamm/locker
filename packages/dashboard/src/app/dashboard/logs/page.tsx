@@ -24,6 +24,7 @@ export default function LogsPage() {
       try {
         const res = await fetch("/api/logs?limit=100", {
           headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();
