@@ -6,25 +6,21 @@ type: project
 
 # Locker — Build Progress
 
-## Phase 1 — Backend API (COMPLETE)
-27 tests passing.
-
-## Phase 2 — CLI (COMPLETE)
-14 tests passing.
-
+## Phase 1 — Backend API (COMPLETE) — 27 tests
+## Phase 2 — CLI (COMPLETE) — 14 tests
 ## Phase 3 — Dashboard (COMPLETE)
-- [x] Next.js on port 5003, modern design (Sora + DM Sans, black/white)
-- [x] Custom SVG icons + LockerLogo
-- [x] Continuity auth flow (/auth) — email-first, expanding card
-- [x] Passkey support (WebAuthn detection + UI)
-- [x] Test account: a@b.c / thankyou (works without backend)
-- [x] Terminal mode hidden but code preserved
-- [x] GitHub link (carterhamm) replacing theme toggle in nav
-- [x] POST /auth/check-email API endpoint added
-- [x] /login and /register redirect to /auth
+## Phase 4 — MCP Server (COMPLETE) — 7 tests
 
-## Phase 4 — MCP Server
-Not started.
+### MCP Details
+- @modelcontextprotocol/sdk server over stdio
+- `locker_get` — retrieves decrypted key, logs agent identifier
+- `locker_list` — lists service names (never key values)
+- Auth via ~/.locker/config (same as CLI)
+- 7 tests passing
+
+## Total: 48 tests (27 API + 14 CLI + 7 MCP)
+
+## All 4 phases complete.
 
 ## Session Log
-- 2026-03-21: Redesigned landing page, built Continuity auth, custom icons, test account, hide terminal mode.
+- 2026-03-21: Completed Phase 4 MCP server. All phases done, 48 tests passing.
