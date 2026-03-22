@@ -107,9 +107,10 @@ loginForm.addEventListener("submit", async (e) => {
 storeForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   storeError.classList.add("hidden");
-  storeSuccess.classList.add("hidden");
   storeBtn.disabled = true;
   storeBtn.textContent = "Storing...";
+  storeBtn.style.background = "#ffffff";
+  storeBtn.style.color = "#000000";
 
   const name = serviceName.value.trim().toLowerCase();
   const key = apiKey.value;
@@ -150,17 +151,26 @@ storeForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    storeSuccess.textContent = `Stored: ${name}`;
-    storeSuccess.classList.remove("hidden");
+    // Show success on the button itself
+    storeBtn.textContent = `Stored: ${name}`;
+    storeBtn.style.background = "#32d74b";
+    storeBtn.style.color = "#000000";
+    storeBtn.disabled = true;
     serviceName.value = "";
     apiKey.value = "";
     setTimeout(() => window.close(), 1500);
+    return; // Skip finally reset
   } catch {
     storeError.textContent = "Cannot connect to Locker API";
     storeError.classList.remove("hidden");
   } finally {
-    storeBtn.disabled = false;
-    storeBtn.textContent = "Store Key";
+    // Only reset if not in success state
+    if (!storeBtn.textContent.startsWith("Stored")) {
+      storeBtn.disabled = false;
+      storeBtn.textContent = "Store Key";
+      storeBtn.style.background = "#ffffff";
+      storeBtn.style.color = "#000000";
+    }
   }
 });
 

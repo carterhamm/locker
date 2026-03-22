@@ -73,6 +73,13 @@ export default function KeysPage() {
     if (token) fetchKeys();
   }, [token]);
 
+  // Live refresh — poll every 5 seconds for new keys
+  useEffect(() => {
+    if (!token || isDemo) return;
+    const interval = setInterval(fetchKeys, 5000);
+    return () => clearInterval(interval);
+  }, [token, isDemo]);
+
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
     setError("");
