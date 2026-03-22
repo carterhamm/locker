@@ -7,7 +7,7 @@ const loginForm = document.getElementById("login-form");
 const storeForm = document.getElementById("store-form");
 const loginEmail = document.getElementById("login-email");
 const loginPassword = document.getElementById("login-password");
-const loginError = document.getElementById("login-error");
+// loginError removed — all login alerts show on the button
 const loginBtn = document.getElementById("login-btn");
 const loginSubtitle = document.getElementById("login-subtitle");
 const toggleMode = document.getElementById("toggle-mode");
@@ -33,10 +33,24 @@ async function init() {
   }
 }
 
+function resetLoginBtn() {
+  loginBtn.disabled = false;
+  loginBtn.textContent = isRegisterMode ? "Create Account" : "Sign In";
+  loginBtn.classList.remove("success-state", "error-state");
+}
+
+function showLoginBtnError(msg) {
+  loginBtn.textContent = msg.length > 45 ? msg.slice(0, 45) + "…" : msg;
+  loginBtn.classList.remove("success-state");
+  loginBtn.classList.add("error-state");
+  loginBtn.disabled = true;
+  setTimeout(resetLoginBtn, 3000);
+}
+
 function showLoginView() {
   loginView.classList.remove("hidden");
   mainView.classList.add("hidden");
-  loginError.classList.add("hidden");
+  resetLoginBtn();
   setTimeout(() => loginEmail.focus(), 50);
 }
 
@@ -56,13 +70,13 @@ toggleMode.addEventListener("click", () => {
   loginBtn.textContent = isRegisterMode ? "Create Account" : "Sign In";
   loginSubtitle.textContent = isRegisterMode ? "Create an account to store keys" : "Sign in to store keys";
   toggleMode.textContent = isRegisterMode ? "Already have an account?" : "Create an account";
-  loginError.classList.add("hidden");
+  resetLoginBtn();
 });
 
 // Login / Register
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  loginError.classList.add("hidden");
+  resetLoginBtn();
   loginBtn.disabled = true;
   loginBtn.textContent = isRegisterMode ? "Creating..." : "Signing in...";
 
@@ -82,8 +96,7 @@ loginForm.addEventListener("submit", async (e) => {
     try { data = await res.json(); } catch { data = {}; }
 
     if (!res.ok) {
-      loginError.textContent = data.error || `Authentication failed (${res.status})`;
-      loginError.classList.remove("hidden");
+      showLoginBtnError(data.error || "Authentication failed");
       return;
     }
 
@@ -93,11 +106,13 @@ loginForm.addEventListener("submit", async (e) => {
     await chrome.storage.local.set({ locker_token: token, locker_email: email });
     showMainView();
   } catch {
-    loginError.textContent = "Cannot connect to Locker API";
-    loginError.classList.remove("hidden");
+    showLoginBtnError("Cannot connect to API");
   } finally {
-    loginBtn.disabled = false;
-    loginBtn.textContent = isRegisterMode ? "Create Account" : "Sign In";
+    // Only reset if not in error state (showLoginBtnError handles its own reset)
+    if (!loginBtn.classList.contains("error-state")) {
+      loginBtn.disabled = false;
+      loginBtn.textContent = isRegisterMode ? "Create Account" : "Sign In";
+    }
   }
 });
 
@@ -147,8 +162,7 @@ storeForm.addEventListener("submit", async (e) => {
       token = null;
       email = null;
       showLoginView();
-      loginError.textContent = "Session expired";
-      loginError.classList.remove("hidden");
+      showLoginBtnError("Session expired");
       return;
     }
 
