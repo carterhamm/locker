@@ -48,6 +48,7 @@ export default function KeysPage() {
   const [newKey, setNewKey] = useState("");
   const [alert, setAlert] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const serviceInputRef = useRef<HTMLInputElement>(null);
 
   function showAlert(msg: string, type: "success" | "error") {
     if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
@@ -231,7 +232,7 @@ export default function KeysPage() {
             )}
           </AnimatePresence>
           <button
-            onClick={() => setShowAdd(!showAdd)}
+            onClick={() => { setShowAdd(!showAdd); if (!showAdd) setTimeout(() => serviceInputRef.current?.focus(), 100); }}
             style={{
               padding: "8px 20px",
               borderRadius: "100px",
@@ -280,7 +281,7 @@ export default function KeysPage() {
                   <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                     Service
                   </label>
-                  <input type="text" value={newService} onChange={(e) => setNewService(e.target.value)} required placeholder="openai" autoComplete="off" data-1p-ignore data-lpignore="true" style={inputStyle} />
+                  <input ref={serviceInputRef} type="text" value={newService} onChange={(e) => setNewService(e.target.value)} required placeholder="openai" autoComplete="off" data-1p-ignore data-lpignore="true" style={inputStyle} />
                 </div>
                 <div style={{ flex: "2 1 300px" }}>
                   <label style={{ display: "block", marginBottom: "6px", color: "var(--text-tertiary)", fontSize: "11px", fontFamily: "var(--font-body)", letterSpacing: "0.06em", textTransform: "uppercase" }}>

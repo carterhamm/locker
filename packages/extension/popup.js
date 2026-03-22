@@ -13,7 +13,7 @@ const loginSubtitle = document.getElementById("login-subtitle");
 const toggleMode = document.getElementById("toggle-mode");
 const serviceName = document.getElementById("service-name");
 const apiKey = document.getElementById("api-key");
-const storeError = document.getElementById("store-error");
+// storeError removed — all alerts show on the button
 const storeBtn = document.getElementById("store-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const userInfo = document.getElementById("user-info");
@@ -43,7 +43,7 @@ function showLoginView() {
 function showMainView() {
   loginView.classList.add("hidden");
   mainView.classList.remove("hidden");
-  storeError.classList.add("hidden");
+  resetStoreBtn();
   userInfo.textContent = email;
   serviceName.value = "";
   apiKey.value = "";
@@ -101,22 +101,34 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
+// Helper: reset button to default
+function resetStoreBtn() {
+  storeBtn.disabled = false;
+  storeBtn.textContent = "Store Key";
+  storeBtn.classList.remove("success-state", "error-state");
+}
+
+// Helper: show error on the button, auto-reset after 3s
+function showBtnError(msg) {
+  storeBtn.textContent = msg;
+  storeBtn.classList.remove("success-state");
+  storeBtn.classList.add("error-state");
+  storeBtn.disabled = true;
+  setTimeout(resetStoreBtn, 3000);
+}
+
 // Store key
 storeForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  storeError.classList.add("hidden");
+  resetStoreBtn();
   storeBtn.disabled = true;
   storeBtn.textContent = "Storing...";
-  storeBtn.classList.remove("success-state");
 
   const name = serviceName.value.trim().toLowerCase();
   const key = apiKey.value;
 
   if (!name || !key) {
-    storeError.textContent = "Both fields are required";
-    storeError.classList.remove("hidden");
-    storeBtn.disabled = false;
-    storeBtn.textContent = "Store Key";
+    showBtnError("Both fields required");
     return;
   }
 
@@ -135,37 +147,29 @@ storeForm.addEventListener("submit", async (e) => {
       token = null;
       email = null;
       showLoginView();
-      loginError.textContent = "Session expired. Please sign in again.";
+      loginError.textContent = "Session expired";
       loginError.classList.remove("hidden");
       return;
     }
 
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
 
     if (!res.ok) {
-      storeError.textContent = data.error || "Failed to store key";
-      storeError.classList.remove("hidden");
+      const msg = data.error || "Failed";
+      showBtnError(msg.length > 28 ? msg.slice(0, 28) + "…" : msg);
       return;
     }
 
-    // Show success on the button itself
+    // Success
     storeBtn.textContent = `\u2713 Stored: ${name}`;
     storeBtn.classList.add("success-state");
     storeBtn.disabled = true;
     serviceName.value = "";
     apiKey.value = "";
     setTimeout(() => window.close(), 1500);
-    return; // Skip finally reset
   } catch {
-    storeError.textContent = "Cannot connect to Locker API";
-    storeError.classList.remove("hidden");
-  } finally {
-    // Only reset if not in success state
-    if (!storeBtn.classList.contains("success-state")) {
-      storeBtn.disabled = false;
-      storeBtn.textContent = "Store Key";
-      storeBtn.classList.remove("success-state");
-    }
+    showBtnError("Connection failed");
   }
 });
 
