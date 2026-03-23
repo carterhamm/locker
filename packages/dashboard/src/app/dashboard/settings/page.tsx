@@ -62,7 +62,6 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
           borderRadius: "var(--radius-lg)",
           background: "rgba(255,255,255,0.02)",
           position: "relative",
-          overflow: "hidden",
         }}
       >
         <FadingBorder radius="var(--radius-lg)" />
@@ -182,16 +181,27 @@ export default function SettingsPage() {
 
       <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
         <div style={{ flex: "3 1 0" }}>
-          <SettingsCard title="Profile">
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <SettingsCard title="Account">
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {/* Email + Plan */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: "11px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Email</div>
+                  <div style={{ fontSize: "15px", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text-primary)" }}>{user?.email}</div>
+                </div>
+                <div style={{ padding: "5px 14px", borderRadius: "100px", background: "rgba(34,197,94,0.08)", color: "var(--success)", fontSize: "12px", fontWeight: 500, fontFamily: "var(--font-body)" }}>Free Plan</div>
+              </div>
+              {/* Name */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Full Name</label>
                 <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); setProfileSaved(false); }} placeholder="Your name" autoComplete="name" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
               </div>
+              {/* Address */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
                 <AddressInput value={billingAddress} onChange={(v) => { setBillingAddress(v); setProfileSaved(false); }} />
               </div>
+              {/* Save */}
               <button
                 onClick={async () => {
                   const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
@@ -212,42 +222,13 @@ export default function SettingsPage() {
                   transition: "all 250ms ease",
                 }}
               >
-                {profileSaved ? "✓ Saved" : "Save Profile"}
+                {profileSaved ? "✓ Saved" : "Save"}
               </button>
             </div>
           </SettingsCard>
         </div>
         <div style={{ flex: "2 1 0" }}>
-          <SettingsCard title="Account">
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <div>
-                <div style={{ fontSize: "11px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  Email
-                </div>
-                <div style={{ fontSize: "15px", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text-primary)" }}>
-                  {user?.email}
-                </div>
-              </div>
-              <div
-                style={{
-                  padding: "5px 14px",
-                  borderRadius: "100px",
-                  background: "rgba(34,197,94,0.08)",
-                  color: "var(--success)",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  fontFamily: "var(--font-body)",
-                  alignSelf: "flex-start",
-                }}
-              >
-                Free Plan
-              </div>
-            </div>
-          </SettingsCard>
-        </div>
-      </div>
-
-      <SettingsCard title="Passkeys">
+          <SettingsCard title="Passkeys">
         <div style={{ marginBottom: "16px" }}>
           <div style={{ fontSize: "14px", fontFamily: "var(--font-body)", fontWeight: 500, marginBottom: "4px" }}>
             Passwordless sign-in
@@ -291,7 +272,9 @@ export default function SettingsPage() {
           {passkeyState === "error" && passkeyError}
           {passkeyState === "idle" && "Register Passkey"}
         </button>
-      </SettingsCard>
+          </SettingsCard>
+        </div>
+      </div>
 
       <SettingsCard title="CLI Quick Start">
         <div

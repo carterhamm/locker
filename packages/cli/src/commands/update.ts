@@ -18,7 +18,8 @@ function prompt(question: string): Promise<string> {
   });
 }
 
-export async function updateCommand(service: string, key: string | undefined, options: { stdin?: boolean }) {
+export async function updateCommand(rawService: string, key: string | undefined, options: { stdin?: boolean }) {
+  const service = rawService.toLowerCase().trim();
   const config = requireAuth();
 
   // Check if key exists first

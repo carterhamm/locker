@@ -18,7 +18,8 @@ function prompt(question: string): Promise<string> {
   });
 }
 
-export async function setCommand(service: string, key: string | undefined, options: { stdin?: boolean }) {
+export async function setCommand(rawService: string, key: string | undefined, options: { stdin?: boolean }) {
+  const service = rawService.toLowerCase().trim();
   let apiKey = key;
 
   // [M6] If no key arg and not piped, prompt securely

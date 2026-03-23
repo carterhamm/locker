@@ -1,7 +1,8 @@
 import { requireAuth } from "../auth/config";
 import { apiRequest } from "../auth/client";
 
-export async function getCommand(service: string, options: { agent?: string }) {
+export async function getCommand(rawService: string, options: { agent?: string }) {
+  const service = rawService.toLowerCase().trim();
   const config = requireAuth();
 
   const headers: Record<string, string> = {};

@@ -1,7 +1,8 @@
 import { requireAuth } from "../auth/config";
 import { apiRequest } from "../auth/client";
 
-export async function revokeCommand(service: string) {
+export async function revokeCommand(rawService: string) {
+  const service = rawService.toLowerCase().trim();
   const config = requireAuth();
 
   const res = await apiRequest(
