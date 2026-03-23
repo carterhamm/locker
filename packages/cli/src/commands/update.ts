@@ -56,5 +56,5 @@ export async function updateCommand(rawService: string, key: string | undefined,
     process.exit(1);
   }
 
-  console.log(`Key updated for ${service}`);
+  console.log(`🔄 Updated: ${service}`);
 }

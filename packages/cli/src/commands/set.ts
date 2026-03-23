@@ -57,5 +57,5 @@ export async function setCommand(rawService: string, key: string | undefined, op
     process.exit(1);
   }
 
-  console.log(`Key stored for ${service}`);
+  console.log(`🔐 Locked: ${service}`);
 }

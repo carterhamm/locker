@@ -13,11 +13,13 @@ interface Suggestion {
 export function AddressInput({
   value,
   onChange,
+  onBlur,
   placeholder = "123 Main St, City, State ZIP",
   style = {},
 }: {
   value: string;
   onChange: (val: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   style?: React.CSSProperties;
 }) {
@@ -95,6 +97,7 @@ export function AddressInput({
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         onFocus={() => { if (suggestions.length > 0) setShowDropdown(true); }}
+        onBlur={() => { onBlur?.(); }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         autoComplete="off"

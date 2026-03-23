@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { FadingBorder } from "@/components/FadingBorder";
 import { startRegistration } from "@simplewebauthn/browser";
@@ -79,6 +79,22 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
   const [profileSaved, setProfileSaved] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const editingRef = useRef(false);
+
+  const saveProfile = useCallback(async () => {
+    // Don't save if user is still editing another field
+    if (editingRef.current) return;
+    const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+    if (!authToken) return;
+    await fetch("/api/auth/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ fullName, billingAddress }),
+    });
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 3000);
+  }, [fullName, billingAddress, token]);
 
   // Load profile
   useEffect(() => {
@@ -179,7 +195,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: "16px", alignItems: "stretch" }}>
         <div style={{ flex: "3 1 0" }}>
           <SettingsCard title="Account">
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -194,36 +210,25 @@ export default function SettingsPage() {
               {/* Name */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Full Name</label>
-                <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); setProfileSaved(false); }} placeholder="Your name" autoComplete="name" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+                <input type="text" value={fullName}
+                  onChange={(e) => { setFullName(e.target.value); editingRef.current = true; }}
+                  onFocus={() => { editingRef.current = true; }}
+                  onBlur={() => { editingRef.current = false; setTimeout(saveProfile, 100); }}
+                  placeholder="Your name" autoComplete="name"
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
               </div>
               {/* Address */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
-                <AddressInput value={billingAddress} onChange={(v) => { setBillingAddress(v); setProfileSaved(false); }} />
+                <AddressInput value={billingAddress} onChange={(v) => { setBillingAddress(v); editingRef.current = true; }}
+                  onBlur={() => { editingRef.current = false; setTimeout(saveProfile, 100); }} />
               </div>
-              {/* Save */}
-              <button
-                onClick={async () => {
-                  const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
-                  await fetch("/api/auth/profile", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
-                    body: JSON.stringify({ fullName, billingAddress }),
-                  });
-                  setProfileSaved(true);
-                  setTimeout(() => setProfileSaved(false), 3000);
-                }}
-                style={{
-                  padding: "8px 20px", borderRadius: "8px", alignSelf: "flex-start",
-                  border: profileSaved ? "1px solid rgba(50,215,75,0.3)" : "none",
-                  background: profileSaved ? "rgba(50,215,75,0.12)" : "#ffffff",
-                  color: profileSaved ? "var(--success)" : "#000000",
-                  fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-                  transition: "all 250ms ease",
-                }}
-              >
-                {profileSaved ? "✓ Saved" : "Save"}
-              </button>
+              {/* Auto-save notification */}
+              {profileSaved && (
+                <div style={{ fontSize: "12px", color: "var(--success)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
+                  ✓ Saved
+                </div>
+              )}
             </div>
           </SettingsCard>
         </div>

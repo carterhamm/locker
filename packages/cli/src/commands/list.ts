@@ -23,16 +23,15 @@ export async function listCommand() {
 
   const services = res.data.services;
   if (services.length === 0) {
-    console.log("No keys stored yet.");
-    console.log("Store one with: locker set <service> <key>");
+    console.log("🔒 No keys stored yet. Run: locker set <service>");
     return;
   }
 
-  console.log(`${services.length} key${services.length === 1 ? "" : "s"} stored:\n`);
+  console.log(`🔐 ${services.length} key${services.length === 1 ? "" : "s"} in your vault:\n`);
   for (const svc of services) {
     const lastUsed = svc.lastUsed
       ? `last used ${new Date(svc.lastUsed).toLocaleDateString()}`
       : "never used";
-    console.log(`  ${svc.service}  (${lastUsed})`);
+    console.log(`  • ${svc.service}  (${lastUsed})`);
   }
 }

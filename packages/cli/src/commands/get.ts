@@ -28,6 +28,10 @@ export async function getCommand(rawService: string, options: { agent?: string }
     process.exit(1);
   }
 
-  // Print key to stdout only — no extra formatting, no logging to disk
-  process.stdout.write(res.data.key);
+  // Print key to stdout — add newline if running in a terminal
+  if (process.stdout.isTTY) {
+    process.stdout.write(res.data.key + "\n");
+  } else {
+    process.stdout.write(res.data.key);
+  }
 }

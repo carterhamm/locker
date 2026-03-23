@@ -20,5 +20,5 @@ export async function revokeCommand(rawService: string) {
     process.exit(1);
   }
 
-  console.log(`Key revoked for ${service}`);
+  console.log(`🗑️  Revoked: ${service}`);
 }
