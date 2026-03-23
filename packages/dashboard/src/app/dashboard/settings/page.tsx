@@ -44,7 +44,7 @@ function CopyLine({ command, comment }: { command: string; comment: string }) {
 
 function SettingsCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: "32px" }}>
+    <div style={{ marginBottom: "32px", display: "flex", flexDirection: "column", flex: 1 }}>
       <h2 style={{
         fontFamily: "var(--font-body)",
         fontSize: "11px",
@@ -62,6 +62,9 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
           borderRadius: "var(--radius-lg)",
           background: "rgba(255,255,255,0.02)",
           position: "relative",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <FadingBorder radius="var(--radius-lg)" />
@@ -232,21 +235,23 @@ export default function SettingsPage() {
             </div>
           </SettingsCard>
         </div>
-        <div style={{ flex: "2 1 0" }}>
+        <div style={{ flex: "2 1 0", display: "flex", flexDirection: "column" }}>
           <SettingsCard title="Passkeys">
-        <div style={{ marginBottom: "16px" }}>
-          <div style={{ fontSize: "14px", fontFamily: "var(--font-body)", fontWeight: 500, marginBottom: "4px" }}>
-            Passwordless sign-in
-          </div>
-          <div style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
-            Register a passkey to sign in with Face ID, Touch ID, or your security key.
-          </div>
-        </div>
+            <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: "180px" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: "14px", fontFamily: "var(--font-body)", fontWeight: 500, marginBottom: "4px" }}>
+                  Passwordless sign-in
+                </div>
+                <div style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+                  Register a passkey to sign in with Face ID, Touch ID, or your security key.
+                </div>
+              </div>
 
         <button
           onClick={(passkeyState === "registered" || passkeyState === "has-passkey") ? undefined : handleRegisterPasskey}
           disabled={passkeyState === "registering" || passkeyState === "registered" || passkeyState === "has-passkey"}
           style={{
+            alignSelf: "flex-end",
             padding: "10px 20px",
             borderRadius: "10px",
             border: (passkeyState === "registered" || passkeyState === "has-passkey")
@@ -277,6 +282,7 @@ export default function SettingsPage() {
           {passkeyState === "error" && passkeyError}
           {passkeyState === "idle" && "Register Passkey"}
         </button>
+            </div>
           </SettingsCard>
         </div>
       </div>
