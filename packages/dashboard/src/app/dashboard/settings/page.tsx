@@ -226,9 +226,16 @@ export default function SettingsPage() {
                 <AddressInput value={billingAddress} onChange={(v) => { setBillingAddress(v); editingRef.current = true; }}
                   onBlur={() => { editingRef.current = false; setTimeout(saveProfile, 100); }} />
               </div>
-              {/* Auto-save notification */}
+              {/* Saved toast — top right of screen */}
               {profileSaved && (
-                <div style={{ fontSize: "12px", color: "var(--success)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
+                <div style={{
+                  position: "fixed", top: "72px", right: "40px", zIndex: 200,
+                  padding: "8px 18px", borderRadius: "100px",
+                  background: "rgba(50,215,75,0.12)", border: "1px solid rgba(50,215,75,0.3)",
+                  color: "var(--success)", fontSize: "13px", fontWeight: 500,
+                  fontFamily: "var(--font-body)",
+                  animation: "fadeIn 200ms ease",
+                }}>
                   ✓ Saved
                 </div>
               )}
