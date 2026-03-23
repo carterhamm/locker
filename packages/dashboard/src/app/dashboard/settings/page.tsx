@@ -189,7 +189,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
-            <input type="text" value={billingAddress} onChange={(e) => { setBillingAddress(e.target.value); setProfileSaved(false); }} placeholder="123 Main St, City, State ZIP" autoComplete="street-address" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+            <input type="text" value={billingAddress} onChange={(e) => { setBillingAddress(e.target.value); setProfileSaved(false); }} placeholder="123 Main St, City, State ZIP" autoComplete="address-line1" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
           </div>
           <button
             onClick={async () => {
@@ -203,7 +203,8 @@ export default function SettingsPage() {
               setTimeout(() => setProfileSaved(false), 3000);
             }}
             style={{
-              padding: "8px 20px", borderRadius: "8px", border: "none", alignSelf: "flex-start",
+              padding: "8px 20px", borderRadius: "8px", alignSelf: "flex-start",
+              border: profileSaved ? "1px solid rgba(50,215,75,0.3)" : "none",
               background: profileSaved ? "rgba(50,215,75,0.12)" : "#ffffff",
               color: profileSaved ? "var(--success)" : "#000000",
               fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer",
