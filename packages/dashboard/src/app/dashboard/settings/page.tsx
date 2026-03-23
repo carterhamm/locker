@@ -179,68 +179,72 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <SettingsCard title="Profile">
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "flex", gap: "12px" }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Full Name</label>
-              <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); setProfileSaved(false); }} placeholder="Your name" autoComplete="name" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+        <div style={{ flex: "3 1 0" }}>
+          <SettingsCard title="Profile">
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Full Name</label>
+                <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); setProfileSaved(false); }} placeholder="Your name" autoComplete="name" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
+                <input type="text" value={billingAddress} onChange={(e) => { setBillingAddress(e.target.value); setProfileSaved(false); }} placeholder="123 Main St, City, State ZIP" autoComplete="address-line1" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+              </div>
+              <button
+                onClick={async () => {
+                  const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+                  await fetch("/api/auth/profile", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+                    body: JSON.stringify({ fullName, billingAddress }),
+                  });
+                  setProfileSaved(true);
+                  setTimeout(() => setProfileSaved(false), 3000);
+                }}
+                style={{
+                  padding: "8px 20px", borderRadius: "8px", alignSelf: "flex-start",
+                  border: profileSaved ? "1px solid rgba(50,215,75,0.3)" : "none",
+                  background: profileSaved ? "rgba(50,215,75,0.12)" : "#ffffff",
+                  color: profileSaved ? "var(--success)" : "#000000",
+                  fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer",
+                  transition: "all 250ms ease",
+                }}
+              >
+                {profileSaved ? "✓ Saved" : "Save Profile"}
+              </button>
             </div>
-          </div>
-          <div>
-            <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
-            <input type="text" value={billingAddress} onChange={(e) => { setBillingAddress(e.target.value); setProfileSaved(false); }} placeholder="123 Main St, City, State ZIP" autoComplete="address-line1" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
-          </div>
-          <button
-            onClick={async () => {
-              const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
-              await fetch("/api/auth/profile", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
-                body: JSON.stringify({ fullName, billingAddress }),
-              });
-              setProfileSaved(true);
-              setTimeout(() => setProfileSaved(false), 3000);
-            }}
-            style={{
-              padding: "8px 20px", borderRadius: "8px", alignSelf: "flex-start",
-              border: profileSaved ? "1px solid rgba(50,215,75,0.3)" : "none",
-              background: profileSaved ? "rgba(50,215,75,0.12)" : "#ffffff",
-              color: profileSaved ? "var(--success)" : "#000000",
-              fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-              transition: "all 250ms ease",
-            }}
-          >
-            {profileSaved ? "✓ Saved" : "Save Profile"}
-          </button>
+          </SettingsCard>
         </div>
-      </SettingsCard>
-
-      <SettingsCard title="Account">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: "11px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              Email
+        <div style={{ flex: "2 1 0" }}>
+          <SettingsCard title="Account">
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  Email
+                </div>
+                <div style={{ fontSize: "15px", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text-primary)" }}>
+                  {user?.email}
+                </div>
+              </div>
+              <div
+                style={{
+                  padding: "5px 14px",
+                  borderRadius: "100px",
+                  background: "rgba(34,197,94,0.08)",
+                  color: "var(--success)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-body)",
+                  alignSelf: "flex-start",
+                }}
+              >
+                Free Plan
+              </div>
             </div>
-            <div style={{ fontSize: "15px", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text-primary)" }}>
-              {user?.email}
-            </div>
-          </div>
-          <div
-            style={{
-              padding: "5px 14px",
-              borderRadius: "100px",
-              background: "rgba(34,197,94,0.08)",
-              color: "var(--success)",
-              fontSize: "12px",
-              fontWeight: 500,
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            Free Plan
-          </div>
+          </SettingsCard>
         </div>
-      </SettingsCard>
+      </div>
 
       <SettingsCard title="Passkeys">
         <div style={{ marginBottom: "16px" }}>
