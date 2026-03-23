@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { FadingBorder } from "@/components/FadingBorder";
 import { startRegistration } from "@simplewebauthn/browser";
+import { AddressInput } from "@/components/AddressInput";
 
 function CopyLine({ command, comment }: { command: string; comment: string }) {
   const [copied, setCopied] = useState(false);
@@ -189,7 +190,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "11px", color: "var(--text-tertiary)", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-body)" }}>Billing Address</label>
-                <input type="text" value={billingAddress} onChange={(e) => { setBillingAddress(e.target.value); setProfileSaved(false); }} placeholder="123 Main St, City, State ZIP" autoComplete="address-line1" style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "none", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "14px", outline: "none" }} />
+                <AddressInput value={billingAddress} onChange={(v) => { setBillingAddress(v); setProfileSaved(false); }} />
               </div>
               <button
                 onClick={async () => {
