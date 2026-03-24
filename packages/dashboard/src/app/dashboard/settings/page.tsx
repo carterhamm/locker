@@ -314,8 +314,8 @@ export default function SettingsPage() {
             </div>
           </SettingsCard>
           <SettingsCard title="Contact">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1 }}>
-              <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
+              <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "16px" }}>
                 Questions, feedback, or partnerships
               </p>
               <button
@@ -332,6 +332,7 @@ export default function SettingsPage() {
                   cursor: "pointer",
                   transition: "all 150ms ease",
                   flexShrink: 0,
+                  alignSelf: "flex-end",
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
