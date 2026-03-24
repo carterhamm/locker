@@ -491,7 +491,7 @@ export default function LandingPage() {
               lineHeight: "1.7",
             }}
           >
-            Free for up to 3 services. Pro starts at $9/month.
+            100 key retrievals/month free. $0.003 per retrieval after that.
           </p>
           <Link
             href="/auth"

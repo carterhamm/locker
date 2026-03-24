@@ -379,7 +379,7 @@ export default function AuthPage() {
             <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
               {step === "email" && "Enter your email to continue"}
               {step === "password" && email}
-              {step === "register" && "Free for up to 3 services"}
+              {step === "register" && "100 free retrievals every month"}
             </p>
           </div>
 
