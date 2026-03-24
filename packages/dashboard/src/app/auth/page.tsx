@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, FormEvent, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, FormEvent, useRef, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { LockerLogo, CloseIcon, PasskeyIcon } from "@/components/Icons";
 import { FadingBorder } from "@/components/FadingBorder";
@@ -16,9 +16,32 @@ const TEST_TOKEN = "eyJkZW1vIjp0cnVlfQ.demo-token";
 
 type Step = "email" | "password" | "register";
 
-export default function AuthPage() {
+export default function AuthPageWrapper() {
+  return <Suspense><AuthPage /></Suspense>;
+}
+
+function AuthPage() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCli = searchParams.get("cli") === "true";
+  const cliPort = searchParams.get("port");
+
+  // Send token back to CLI's local server
+  const sendToCli = useCallback((token: string, email: string) => {
+    if (isCli && cliPort) {
+      window.location.href = `http://localhost:${cliPort}/callback?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+    }
+  }, [isCli, cliPort]);
+
+  function onLoginSuccess(token: string, user: { id: string; email: string }) {
+    login(token, user);
+    if (isCli && cliPort) {
+      sendToCli(token, user.email);
+    } else {
+      router.push("/dashboard");
+    }
+  }
 
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -117,8 +140,7 @@ export default function AuthPage() {
       // Test account shortcut
       if (email.toLowerCase() === TEST_EMAIL) {
         if (password === TEST_PASSWORD) {
-          login(TEST_TOKEN, TEST_USER);
-          router.push("/dashboard");
+          onLoginSuccess(TEST_TOKEN, TEST_USER);
           return;
         } else {
           setError("Invalid password");
@@ -137,8 +159,7 @@ export default function AuthPage() {
         setError(data.error || "Invalid password");
         return;
       }
-      login(data.token, data.user);
-      router.push("/dashboard");
+      onLoginSuccess(data.token, data.user);
     } catch {
       setError("Cannot connect to server");
     } finally {
@@ -168,8 +189,7 @@ export default function AuthPage() {
         setError(data.error || "Registration failed");
         return;
       }
-      login(data.token, data.user);
-      router.push("/dashboard");
+      onLoginSuccess(data.token, data.user);
     } catch {
       setError("Cannot connect to server");
     } finally {
@@ -212,8 +232,7 @@ export default function AuthPage() {
         return;
       }
 
-      login(verifyData.token, verifyData.user);
-      router.push("/dashboard");
+      onLoginSuccess(verifyData.token, verifyData.user);
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "NotAllowedError") {
         setError("Passkey authentication was cancelled");

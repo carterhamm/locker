@@ -1,93 +1,80 @@
-import readline from "node:readline";
+import http from "node:http";
 import { writeConfig } from "../auth/config";
-import { authRequest, getDefaultApiUrl } from "../auth/client";
+import { getDefaultApiUrl } from "../auth/client";
 
-function prompt(question: string, hidden = false): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+const DASHBOARD_URL = "https://dashboard-production-fe57.up.railway.app";
 
-  return new Promise((resolve) => {
-    if (hidden && process.stdin.isTTY) {
-      // Hide password input
-      process.stdout.write(question);
-      const stdin = process.stdin;
-      stdin.setRawMode(true);
-      stdin.resume();
-      stdin.setEncoding("utf8");
-
-      let input = "";
-      const onData = (ch: string) => {
-        if (ch === "\n" || ch === "\r" || ch === "\u0004") {
-          stdin.setRawMode(false);
-          stdin.removeListener("data", onData);
-          stdin.pause();
-          rl.close();
-          process.stdout.write("\n");
-          resolve(input);
-        } else if (ch === "\u0003") {
-          // Ctrl-C
-          process.exit(0);
-        } else if (ch === "\u007F" || ch === "\b") {
-          // Backspace
-          if (input.length > 0) {
-            input = input.slice(0, -1);
-          }
-        } else {
-          input += ch;
-        }
-      };
-      stdin.on("data", onData);
-    } else {
-      rl.question(question, (answer) => {
-        rl.close();
-        resolve(answer);
-      });
-    }
-  });
+function openBrowser(url: string) {
+  const { exec } = require("node:child_process");
+  const cmd = process.platform === "darwin" ? "open" :
+              process.platform === "win32" ? "start" : "xdg-open";
+  exec(`${cmd} "${url}"`);
 }
 
 export async function loginCommand(options: { register?: boolean; api?: string }) {
   const apiUrl = options.api || getDefaultApiUrl();
-  const isRegister = options.register || false;
 
-  console.log(isRegister ? "Create a new Locker account" : "Log in to Locker");
-  console.log();
+  console.log("🔐 Opening browser to sign in...\n");
 
-  const email = await prompt("Email: ");
-  const password = await prompt("Password: ", true);
+  // Start a temporary local server to receive the callback
+  const server = http.createServer((req, res) => {
+    const url = new URL(req.url || "/", `http://localhost`);
 
-  if (!email || !password) {
-    console.error("Email and password are required.");
-    process.exit(1);
-  }
+    if (url.pathname === "/callback") {
+      const token = url.searchParams.get("token");
+      const email = url.searchParams.get("email");
 
-  if (isRegister && password.length < 8) {
-    console.error("Password must be at least 8 characters.");
-    process.exit(1);
-  }
+      if (token && email) {
+        writeConfig({ token, email, apiUrl });
 
-  const endpoint = isRegister ? "/auth/register" : "/auth/login";
-  const res = await authRequest<{ token: string; user: { id: string; email: string } }>(
-    "POST",
-    endpoint,
-    apiUrl,
-    { email, password }
-  );
+        // Send a nice HTML response
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(`
+          <html>
+            <body style="background:#000;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
+              <div style="text-align:center">
+                <h1 style="font-size:48px;margin-bottom:16px">🔐</h1>
+                <h2 style="font-weight:600;margin-bottom:8px">You're in!</h2>
+                <p style="color:rgba(255,255,255,0.5)">Logged in as ${email}. You can close this tab.</p>
+              </div>
+            </body>
+          </html>
+        `);
 
-  if (!res.ok) {
-    console.error(res.data.error || "Authentication failed.");
-    process.exit(1);
-  }
+        console.log(`✅ Logged in as ${email}`);
+        console.log("   Token stored in ~/.locker/config\n");
 
-  writeConfig({
-    token: res.data.token,
-    email: res.data.user.email,
-    apiUrl,
+        // Shut down after a brief delay
+        setTimeout(() => {
+          server.close();
+          process.exit(0);
+        }, 500);
+      } else {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("Missing token or email");
+      }
+    } else {
+      res.writeHead(404);
+      res.end();
+    }
   });
 
-  console.log();
-  console.log(`Logged in as ${res.data.user.email}`);
-  console.log("Token stored in ~/.locker/config");
+  // Listen on a random port
+  server.listen(0, () => {
+    const port = (server.address() as any).port;
+    const authUrl = `${DASHBOARD_URL}/auth?cli=true&port=${port}${options.register ? "&register=true" : ""}`;
+
+    console.log(`   Listening on http://localhost:${port}`);
+    console.log(`   If the browser didn't open, visit:\n`);
+    console.log(`   ${authUrl}\n`);
+
+    openBrowser(authUrl);
+  });
+
+  // Timeout after 5 minutes
+  setTimeout(() => {
+    console.error("\n⏱️  Login timed out. Run `locker login` to try again.");
+    server.close();
+    process.exit(1);
+  }, 5 * 60 * 1000);
 }
