@@ -294,21 +294,27 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <SettingsCard title="CLI Quick Start">
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "13px",
-            lineHeight: "2",
-            color: "var(--text-secondary)",
-          }}
-        >
-          <CopyLine command="npm install -g locker-cli" comment="Install" />
-          <CopyLine command="locker login" comment="Login" />
-          <CopyLine command="locker set openai sk-proj-..." comment="Store a key" />
-          <CopyLine command="locker get openai" comment="Retrieve (agents call this)" />
+      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+        <div style={{ flex: "1 1 0" }}>
+          <SettingsCard title="CLI">
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "2", color: "var(--text-secondary)" }}>
+              <CopyLine command="npm install -g locker-cli" comment="Install" />
+              <CopyLine command="locker login" comment="Login" />
+              <CopyLine command="locker set openai" comment="Store a key" />
+              <CopyLine command="locker get openai" comment="Retrieve" />
+              <CopyLine command="locker update" comment="Update CLI" />
+            </div>
+          </SettingsCard>
         </div>
-      </SettingsCard>
+        <div style={{ flex: "1 1 0" }}>
+          <SettingsCard title="AI Agent Setup">
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "2", color: "var(--text-secondary)" }}>
+              <CopyLine command="locker mcp install" comment="MCP server (Claude, Cursor)" />
+              <CopyLine command="npx skills add carterhamm/locker --skill locker -g" comment="Claude Code skill (global)" />
+            </div>
+          </SettingsCard>
+        </div>
+      </div>
     </div>
   );
 }

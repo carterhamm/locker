@@ -433,8 +433,8 @@ export default function LandingPage() {
           />
           <FeatureCard
             icon={({ hover }) => <AnimTerminal hover={hover} />}
-            title="CLI-First"
-            description="Built for developers. locker get <service> returns your key to stdout. Works with Claude, Cursor, Codex."
+            title="CLI + MCP + Skill"
+            description="CLI for your terminal, MCP server for AI agents, Claude Code skill for automatic key retrieval. One install, every tool covered."
             delay={160}
             glowColor="rgba(50,215,75,0.06)"
           />
