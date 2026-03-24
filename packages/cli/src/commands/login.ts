@@ -1,5 +1,6 @@
 import http from "node:http";
-import { writeConfig } from "../auth/config";
+import readline from "node:readline";
+import { readConfig, writeConfig } from "../auth/config";
 import { getDefaultApiUrl } from "../auth/client";
 
 const DASHBOARD_URL = "https://dashboard-production-fe57.up.railway.app";
@@ -11,10 +12,24 @@ function openBrowser(url: string) {
   exec(`${cmd} "${url}"`);
 }
 
+function waitForEnter(message: string): Promise<void> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(message, () => { rl.close(); resolve(); });
+  });
+}
+
 export async function loginCommand(options: { register?: boolean; api?: string }) {
   const apiUrl = options.api || getDefaultApiUrl();
 
-  console.log("🔐 Opening browser to sign in...\n");
+  // Check if already logged in
+  const existing = readConfig();
+  if (existing) {
+    console.log(`\u{1F511} Already logged in as ${existing.email}\n`);
+    await waitForEnter("   Press Enter to sign in with a different account, or Ctrl+C to cancel.\n");
+  }
+
+  console.log("\u{1F510} Opening browser to sign in...\n");
 
   // Start a temporary local server to receive the callback
   const server = http.createServer((req, res) => {

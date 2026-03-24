@@ -1,6 +1,6 @@
 {
   "name": "locker-cli",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "CLI for Locker — secure API credential manager for AI agents",
   "main": "dist/index.js",
   "bin": {

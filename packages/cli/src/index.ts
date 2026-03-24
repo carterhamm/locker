@@ -58,25 +58,26 @@ program
   .action(revokeCommand);
 
 program
-  .command("update <service> [key]")
-  .description("Update an existing API key")
+  .command("replace <service> [key]")
+  .description("Replace an existing API key with a new one")
   .option("--stdin", "Read key from stdin")
   .action(updateCommand);
 
-program
-  .command("upgrade")
-  .description("Update the Locker CLI to the latest version")
-  .action(async () => {
-    console.log("🔄 Updating locker-cli...\n");
-    const { execSync } = require("node:child_process");
-    try {
-      execSync("npm install -g locker-cli@latest", { stdio: "inherit" });
-      console.log("\n✅ Locker CLI updated!");
-    } catch {
-      console.error("\n❌ Update failed. Try: npm install -g locker-cli@latest");
-      process.exit(1);
-    }
-  });
+// Self-update commands — both work
+const selfUpdate = async () => {
+  console.log("\u{1F504} Updating locker-cli...\n");
+  const { execSync } = require("node:child_process");
+  try {
+    execSync("npm install -g locker-cli@latest", { stdio: "inherit" });
+    console.log("\n\u2705 Locker CLI updated!");
+  } catch {
+    console.error("\n\u274C Update failed. Try: npm install -g locker-cli@latest");
+    process.exit(1);
+  }
+};
+
+program.command("update").description("Update Locker CLI to the latest version").action(selfUpdate);
+program.command("upgrade").description("Update Locker CLI to the latest version").action(selfUpdate);
 
 const mcp = program
   .command("mcp")
