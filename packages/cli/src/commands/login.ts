@@ -35,9 +35,8 @@ export async function loginCommand(options: { register?: boolean; api?: string }
 <div style="text-align:center">
 <div style="font-size:48px;margin-bottom:16px">\u{1F510}</div>
 <h2 style="font-weight:600;margin-bottom:8px">You're in!</h2>
-<p style="color:rgba(255,255,255,0.5)">Logged in as ${email}. This tab will close automatically.</p>
+<p style="color:rgba(255,255,255,0.5)">Logged in as ${email}. You can close this tab.</p>
 </div>
-<script>setTimeout(function(){window.close()},1500)</script>
 </body></html>`);
 
         console.log(`✅ Logged in as ${email}`);
