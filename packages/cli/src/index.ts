@@ -63,6 +63,21 @@ program
   .option("--stdin", "Read key from stdin")
   .action(updateCommand);
 
+program
+  .command("upgrade")
+  .description("Update the Locker CLI to the latest version")
+  .action(async () => {
+    console.log("🔄 Updating locker-cli...\n");
+    const { execSync } = require("node:child_process");
+    try {
+      execSync("npm install -g locker-cli@latest", { stdio: "inherit" });
+      console.log("\n✅ Locker CLI updated!");
+    } catch {
+      console.error("\n❌ Update failed. Try: npm install -g locker-cli@latest");
+      process.exit(1);
+    }
+  });
+
 const mcp = program
   .command("mcp")
   .description("Manage the Locker MCP server");
