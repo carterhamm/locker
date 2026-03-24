@@ -314,25 +314,30 @@ export default function SettingsPage() {
             </div>
           </SettingsCard>
           <SettingsCard title="Contact">
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
-              <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1 }}>
+              <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
                 Questions, feedback, or partnerships
               </p>
               <button
                 style={{
-                  alignSelf: "flex-start",
-                  padding: "8px 20px",
+                  display: "flex", alignItems: "center", gap: "7px",
+                  padding: "8px 18px",
                   borderRadius: "8px",
                   border: "none",
-                  background: "rgba(255,255,255,0.06)",
-                  color: "var(--text-secondary)",
+                  background: "#ffffff",
+                  color: "#000000",
                   fontFamily: "var(--font-body)",
                   fontSize: "13px",
-                  fontWeight: 500,
+                  fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 150ms ease",
+                  flexShrink: 0,
                 }}
               >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="M22 4L12 13L2 4" />
+                </svg>
                 Email Us
               </button>
             </div>
