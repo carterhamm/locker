@@ -27,6 +27,27 @@ async function init() {
   if (stored.locker_token && stored.locker_email) {
     token = stored.locker_token;
     email = stored.locker_email;
+    // Verify token is still valid before showing main view
+    try {
+      const res = await fetch(`${API_URL}/health`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Also check a protected endpoint to verify JWT
+      const keysRes = await fetch(`${API_URL}/keys`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (keysRes.status === 401) {
+        // Token expired — clear and show login
+        await chrome.storage.local.remove(["locker_token", "locker_email"]);
+        token = null;
+        email = null;
+        showLoginView();
+        showLoginBtnError("Session expired — sign in again");
+        return;
+      }
+    } catch {
+      // Can't reach API — show main view anyway, will fail on submit
+    }
     showMainView();
   } else {
     showLoginView();

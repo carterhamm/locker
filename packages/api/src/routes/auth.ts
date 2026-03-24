@@ -23,8 +23,8 @@ const authLimiter = rateLimit({
 authRouter.use(authLimiter);
 
 const SALT_ROUNDS = 12;
-const JWT_EXPIRY = "24h";
-const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 24h in ms
+const JWT_EXPIRY = "30d";
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(email: string): boolean {
