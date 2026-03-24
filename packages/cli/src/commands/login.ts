@@ -27,19 +27,18 @@ export async function loginCommand(options: { register?: boolean; api?: string }
       if (token && email) {
         writeConfig({ token, email, apiUrl });
 
-        // Send a nice HTML response
-        res.writeHead(200, { "Content-Type": "text/html" });
-        res.end(`
-          <html>
-            <body style="background:#000;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
-              <div style="text-align:center">
-                <h1 style="font-size:48px;margin-bottom:16px">🔐</h1>
-                <h2 style="font-weight:600;margin-bottom:8px">You're in!</h2>
-                <p style="color:rgba(255,255,255,0.5)">Logged in as ${email}. You can close this tab.</p>
-              </div>
-            </body>
-          </html>
-        `);
+        // Send success page that auto-closes
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        res.end(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Locker</title></head>
+<body style="background:#000;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
+<div style="text-align:center">
+<div style="font-size:48px;margin-bottom:16px">\u{1F510}</div>
+<h2 style="font-weight:600;margin-bottom:8px">You're in!</h2>
+<p style="color:rgba(255,255,255,0.5)">Logged in as ${email}. This tab will close automatically.</p>
+</div>
+<script>setTimeout(function(){window.close()},1500)</script>
+</body></html>`);
 
         console.log(`✅ Logged in as ${email}`);
         console.log("   Token stored in ~/.locker/config\n");
