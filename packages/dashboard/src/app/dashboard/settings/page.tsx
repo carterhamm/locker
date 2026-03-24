@@ -294,8 +294,8 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-        <div style={{ flex: "1 1 0" }}>
+      <div style={{ display: "flex", gap: "16px", alignItems: "stretch" }}>
+        <div style={{ flex: "1 1 0", display: "flex", flexDirection: "column" }}>
           <SettingsCard title="CLI">
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "2", color: "var(--text-secondary)" }}>
               <CopyLine command="npm install -g locker-cli" comment="Install" />
@@ -306,11 +306,35 @@ export default function SettingsPage() {
             </div>
           </SettingsCard>
         </div>
-        <div style={{ flex: "1 1 0" }}>
+        <div style={{ flex: "1 1 0", display: "flex", flexDirection: "column", gap: "0" }}>
           <SettingsCard title="AI Agent Setup">
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "2", color: "var(--text-secondary)" }}>
               <CopyLine command="locker mcp install" comment="MCP server (Claude, Cursor)" />
               <CopyLine command="npx skills add carterhamm/locker --skill locker -g" comment="Claude Code skill (global)" />
+            </div>
+          </SettingsCard>
+          <SettingsCard title="Contact">
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
+              <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontFamily: "var(--font-body)", marginBottom: "16px" }}>
+                Questions, feedback, or partnerships
+              </p>
+              <button
+                style={{
+                  alignSelf: "flex-start",
+                  padding: "8px 20px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "var(--text-secondary)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 150ms ease",
+                }}
+              >
+                Email Us
+              </button>
             </div>
           </SettingsCard>
         </div>
