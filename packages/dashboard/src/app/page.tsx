@@ -155,15 +155,7 @@ export default function LandingPage() {
 
   return (
     <div style={{ minHeight: "100vh", position: "relative" }}>
-      {/* Progressive blur edges */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: "80px", zIndex: 99, pointerEvents: "none" }}>
-        <ProgressiveBlur position="top" height="100%" blurLevels={[0.5, 1, 2, 4, 8]} />
-      </div>
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: "80px", zIndex: 99, pointerEvents: "none" }}>
-        <ProgressiveBlur position="bottom" height="100%" blurLevels={[0.5, 1, 2, 4, 8]} />
-      </div>
-
-      {/* ── Mesh gradient background atmosphere ── */}
+{/* ── Mesh gradient background atmosphere ── */}
       <div className="mesh-gradient">
         <div className="orb" />
         <div className="orb" />
