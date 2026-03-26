@@ -40,7 +40,7 @@ const RP_NAME = "Locker";
 const RP_ID = process.env.PASSKEY_RP_ID || "localhost";
 const RP_ORIGIN = process.env.PASSKEY_RP_ORIGIN || "http://localhost:5003";
 
-const JWT_EXPIRY = "24h";
+const JWT_EXPIRY = "30d";
 
 function issueJWT(res: Response, userId: string, email: string): string {
   const secret = requireEnv("JWT_SECRET");
