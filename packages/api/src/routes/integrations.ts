@@ -142,20 +142,30 @@ integrationsRouter.get("/:provider/callback", async (req: Request, res: Response
 
     const redirectUri = `${process.env.API_BASE_URL || "https://api-production-449f.up.railway.app"}/integrations/${providerId}/callback`;
 
-    // Exchange code for tokens
+    // Exchange code for tokens (GitHub uses form-encoded, others use JSON)
+    const isGitHub = providerId === "github";
+    const tokenBody = isGitHub
+      ? new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code: code as string,
+          redirect_uri: redirectUri,
+        }).toString()
+      : JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          redirect_uri: redirectUri,
+          grant_type: "authorization_code",
+        });
+
     const tokenRes = await fetch(provider.rows[0].token_url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": isGitHub ? "application/x-www-form-urlencoded" : "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-        redirect_uri: redirectUri,
-        grant_type: "authorization_code",
-      }),
+      body: tokenBody,
     });
 
     const tokenData = await tokenRes.json() as Record<string, unknown>;

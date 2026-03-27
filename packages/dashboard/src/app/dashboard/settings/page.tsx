@@ -76,6 +76,40 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
 
 export default function SettingsPage() {
   const { user, token } = useAuth();
+  const [integrations, setIntegrations] = useState<{id: string; name: string; connected: boolean; connectedEmail: string | null}[]>([]);
+
+  // Load integrations
+  useEffect(() => {
+    (async () => {
+      try {
+        const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+        if (!authToken) return;
+        const res = await fetch("/api/integrations", { headers: { Authorization: `Bearer ${authToken}` } });
+        if (res.ok) {
+          const data = await res.json();
+          setIntegrations(data.integrations || []);
+        }
+      } catch {}
+    })();
+  }, [token]);
+
+  async function connectProvider(providerId: string) {
+    const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+    if (!authToken) return;
+    const res = await fetch(`/api/integrations/${providerId}/connect`, { headers: { Authorization: `Bearer ${authToken}` } });
+    if (res.ok) {
+      const data = await res.json();
+      window.location.href = data.url;
+    }
+  }
+
+  async function disconnectProvider(providerId: string) {
+    const authToken = (token && token !== "cookie") ? token : localStorage.getItem("locker-token");
+    if (!authToken) return;
+    await fetch(`/api/integrations/${providerId}`, { method: "DELETE", headers: { Authorization: `Bearer ${authToken}` } });
+    setIntegrations(prev => prev.map(i => i.id === providerId ? { ...i, connected: false, connectedEmail: null } : i));
+  }
+
   const [passkeyState, setPasskeyState] = useState<"idle" | "registering" | "registered" | "has-passkey" | "error">("idle");
   const [passkeyError, setPasskeyError] = useState("");
   const [passkeyCount, setPasskeyCount] = useState(0);
@@ -293,6 +327,37 @@ export default function SettingsPage() {
           </SettingsCard>
         </div>
       </div>
+
+      {integrations.length > 0 && (
+        <SettingsCard title="Integrations">
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {integrations.map((i) => (
+              <div key={i.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: "8px", background: "rgba(255,255,255,0.02)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase" }}>
+                    {i.name.slice(0, 2)}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "14px", fontWeight: 500, fontFamily: "var(--font-body)" }}>{i.name}</div>
+                    {i.connected && i.connectedEmail && (
+                      <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>{i.connectedEmail}</div>
+                    )}
+                  </div>
+                </div>
+                {i.connected ? (
+                  <button onClick={() => disconnectProvider(i.id)} style={{ padding: "5px 12px", borderRadius: "100px", border: "none", background: "rgba(239,68,68,0.08)", color: "var(--error)", fontSize: "12px", fontWeight: 500, fontFamily: "var(--font-body)", cursor: "pointer" }}>
+                    Disconnect
+                  </button>
+                ) : (
+                  <button onClick={() => connectProvider(i.id)} style={{ padding: "5px 14px", borderRadius: "100px", border: "none", background: "#ffffff", color: "#000000", fontSize: "12px", fontWeight: 600, fontFamily: "var(--font-body)", cursor: "pointer" }}>
+                    Connect
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </SettingsCard>
+      )}
 
       <div style={{ display: "flex", gap: "16px", alignItems: "stretch" }}>
         <div style={{ flex: "1 1 0", display: "flex", flexDirection: "column" }}>
