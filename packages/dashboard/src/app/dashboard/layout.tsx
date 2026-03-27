@@ -11,6 +11,7 @@ const PAGE_PADDING = 40;
 const navItems = [
   { href: "/dashboard", label: "Keys", icon: "K" },
   { href: "/dashboard/logs", label: "Logs", icon: "L" },
+  { href: "/dashboard/integrations", label: "Integrations", icon: "I" },
   { href: "/dashboard/settings", label: "Settings", icon: "S" },
 ];
 
