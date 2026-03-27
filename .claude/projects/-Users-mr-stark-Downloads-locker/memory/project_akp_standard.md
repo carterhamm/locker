@@ -51,12 +51,24 @@ An open standard where service providers (OpenAI, Resend, Stripe, etc.) expose a
 - Manages OAuth connections to services
 - Audits all key issuances
 
+## Approach
+Build V1 as Locker-first — get the UX and logic right on our own product.
+Once perfected, extract it into the open standard. Don't ship a half-baked
+spec that hasn't been battle-tested.
+
+## V1 Spec (simplified, see separate AKP spec in memory)
+- Agent side: standardized endpoint for key retrieval from any store
+- Provider side: manifest + connect flow for services to send keys to stores
+- Keys persist as long as user wants (not ephemeral-only)
+- No required middleman — stores are just where keys live
+- Open for anyone: key stores, service providers, agents
+
 ## Next steps
-- Draft the spec (both sides)
-- Build reference implementation in Locker
-- Build Provider SDK as Express/Fastify middleware
-- Approach 2-3 services (Resend, Vercel, Anthropic) for early adoption
-- Approach 2-3 agents (Claude Code, Cursor, Codex) for client adoption
-- Publish both SDKs
+1. Build AKP into Locker as the reference implementation
+2. Test with real agents (Claude Code MCP, Cursor)
+3. Test with real services (start with GitHub OAuth — already built)
+4. Iterate on the UX until it's seamless
+5. THEN extract into open spec + SDKs
+6. Approach services and agents for adoption
 
 **Why:** This is the long-term moat. The protocol is open, Locker is the default broker. Same playbook as OAuth — spec is free, infrastructure is the business.
